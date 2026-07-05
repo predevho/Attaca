@@ -1,6 +1,7 @@
 package com.back.global.exception;
 
 import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 
 /**
@@ -10,6 +11,7 @@ import org.springframework.http.HttpStatus;
  * 도메인별 에러 코드는 각 도메인에서 별도 enum으로 확장하거나 여기에 추가한다.
  */
 @Getter
+@RequiredArgsConstructor
 public enum ErrorCode {
 
     INTERNAL_SERVER_ERROR(50001, HttpStatus.INTERNAL_SERVER_ERROR, "서버 내부 오류가 발생했습니다."),
@@ -19,12 +21,6 @@ public enum ErrorCode {
     private final int resultCode;
     private final HttpStatus status;
     private final String message;
-
-    ErrorCode(int resultCode, HttpStatus status, String message) {
-        this.resultCode = resultCode;
-        this.status = status;
-        this.message = message;
-    }
 
     /** 에러 코드 문자열. enum 상수 이름을 그대로 사용한다. */
     public String getCode() {
