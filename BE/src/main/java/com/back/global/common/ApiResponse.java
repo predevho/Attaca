@@ -1,6 +1,8 @@
 package com.back.global.common;
 
 import com.back.global.exception.ErrorCode;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 /**
@@ -12,17 +14,12 @@ import lombok.Getter;
  * </pre>
  */
 @Getter
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
 public class ApiResponse<T> {
 
     private final boolean success;
     private final T data;
     private final ErrorBody error;
-
-    private ApiResponse(boolean success, T data, ErrorBody error) {
-        this.success = success;
-        this.data = data;
-        this.error = error;
-    }
 
     public static <T> ApiResponse<T> success(T data) {
         return new ApiResponse<>(true, data, null);
