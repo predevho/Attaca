@@ -32,7 +32,7 @@ class ApiResponseTest {
         assertThat(response.isSuccess()).isFalse();
         assertThat(response.getData()).isNull();
         assertThat(response.getError()).isNotNull();
-        assertThat(response.getError().resultCode()).isEqualTo(50001);
+        assertThat(response.getError().resultCode()).isEqualTo("500-01");
         assertThat(response.getError().code()).isEqualTo("INTERNAL_SERVER_ERROR");
         assertThat(response.getError().message())
                 .isEqualTo(ErrorCode.INTERNAL_SERVER_ERROR.getMessage());
@@ -44,7 +44,7 @@ class ApiResponseTest {
                 ApiResponse.error(ErrorCode.INVALID_INPUT_VALUE, "이메일 형식이 올바르지 않습니다.");
 
         assertThat(response.isSuccess()).isFalse();
-        assertThat(response.getError().resultCode()).isEqualTo(40001);
+        assertThat(response.getError().resultCode()).isEqualTo("400-01");
         assertThat(response.getError().code()).isEqualTo("INVALID_INPUT_VALUE");
         assertThat(response.getError().message()).isEqualTo("이메일 형식이 올바르지 않습니다.");
     }

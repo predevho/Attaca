@@ -41,6 +41,6 @@ public class ApiResponse<T> {
         return new ApiResponse<>(false, null, body);
     }
 
-    public record ErrorBody(int resultCode, String code, String message) {
+    public record ErrorBody(String resultCode, String code, String message) {
     }
 }

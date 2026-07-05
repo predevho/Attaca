@@ -12,7 +12,7 @@
 {
   "success": true | false,
   "data": { ... } | null,
-  "error": { "resultCode": 40001, "code": "INVALID_INPUT_VALUE", "message": "..." } | null
+  "error": { "resultCode": "400-01", "code": "INVALID_INPUT_VALUE", "message": "..." } | null
 }
 ```
 
@@ -20,8 +20,8 @@
 * 실패 시 `success = false`, `data = null`, `error`에 `resultCode`/`code`/`message`.
 * 구현: `com.back.global.common.ApiResponse<T>` (정적 팩토리 `success`/`success(data)`/`error`). `error`는 nested record `ErrorBody(resultCode, code, message)`.
 * `error.code` 문자열은 `ErrorCode` enum 상수 이름을 그대로 사용한다 (예: `INVALID_INPUT_VALUE`).
-* `error.resultCode`(int)는 HTTP 상태 기반 숫자 코드다. `ErrorCode`에 정의하며 Swagger/Postman 문서화·클라이언트 식별에 사용한다.
-  * 규칙: `HTTP 상태(3자리) + 일련번호(2자리)`. 예) 400 계열 `40001`, 405 계열 `40501`, 500 계열 `50001`.
+* `error.resultCode`(String)는 `HTTP상태-일련번호` 형식의 문자열 코드다. `ErrorCode`에 정의하며 Swagger/Postman 문서화·클라이언트 식별에 사용한다.
+  * 규칙: `HTTP 상태(3자리)-일련번호(2자리)`. 예) 400 계열 `400-01`, 405 계열 `405-01`, 500 계열 `500-01`.
 
 ---
 
@@ -33,7 +33,7 @@
   * `ErrorCode` (enum) : 에러 코드와 기본 메시지, HTTP 상태를 정의한다.
   * `GlobalExceptionHandler` (`@RestControllerAdvice`) : 예외를 응답 래퍼로 일괄 변환한다.
 * 도메인은 자기 예외를 `BusinessException`을 상속하거나 `ErrorCode`를 사용해 던진다.
-* `ErrorCode`는 `(resultCode:int, status:HttpStatus, message:String)`를 갖는다. `getCode()`는 enum 상수명을 반환한다.
+* `ErrorCode`는 `(resultCode:String, status:HttpStatus, message:String)`를 갖는다. `getCode()`는 enum 상수명을 반환한다.
 
 ---
 

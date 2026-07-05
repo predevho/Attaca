@@ -12,3 +12,5 @@
 * 2026-07-05 — `ErrorCode` 수동 생성자를 Lombok `@RequiredArgsConstructor`로 대체(수동 생성자와 중복 정의 충돌 확인 후 제거). 동작/응답 포맷 변경 없음, `clean build` 통과. (커밋 `4a03d3a`)
 * 2026-07-05 — 설계 유지 결정 논의: (1) `JpaAuditingConfig` 분리 구조 유지 — `@DataJpaTest` 슬라이스 테스트에서 `@Import`로 감사 설정을 재사용하기 위함(진입점 부착은 슬라이스에서 감사 비활성 문제). (2) `ApiResponse` 현재 설계 유지 — 타 프로젝트의 평면 record(`resultCode` 문자열 `"200-1"` 방식)와 비교했으나, 도메인 다수·에러 중앙관리(`ErrorCode` enum) 이점으로 현행(success 불리언 + data/error 분리) 유지.
 * 2026-07-05 — TIL 문서 체계 시작: `docs/TIL/` 신설, `docs/TIL/2026-07-05-generics.md`(Java 제네릭 상세) 작성. 학습 기록용이며 코드/설계에 영향 없음.
+* 2026-07-05 — 노션 프로젝트 허브 구성(`AIBE6 기록` 워크스페이스): "Attaca 프로젝트" 페이지 + TODO/TIL/스케줄 DB(보드·캘린더 뷰) + 프로젝트 문서 4종. `CLAUDE.md`에 노션 동기화 규칙 추가.
+* 2026-07-05 — `resultCode` 포맷 변경: `int 40001` → `String "400-01"`(HTTP상태-일련번호, 가독성). `ErrorCode`/`ApiResponse.ErrorBody`/테스트/문서 반영, TDD(RED→GREEN) 후 `clean build` 통과.
