@@ -29,6 +29,7 @@ class GlobalExceptionHandlerTest {
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.success").value(false))
                 .andExpect(jsonPath("$.data").isEmpty())
+                .andExpect(jsonPath("$.error.resultCode").value(40001))
                 .andExpect(jsonPath("$.error.code").value("INVALID_INPUT_VALUE"))
                 .andExpect(jsonPath("$.error.message").value("커스텀 메시지"));
     }
@@ -39,6 +40,7 @@ class GlobalExceptionHandlerTest {
                 .andExpect(status().isInternalServerError())
                 .andExpect(jsonPath("$.success").value(false))
                 .andExpect(jsonPath("$.data").isEmpty())
+                .andExpect(jsonPath("$.error.resultCode").value(50001))
                 .andExpect(jsonPath("$.error.code").value("INTERNAL_SERVER_ERROR"));
     }
 

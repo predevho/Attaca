@@ -4,6 +4,7 @@
 
 ---
 
+* [x] (2026-07-05) 전역 코드 리뷰 반영: `ErrorCode.resultCode`(int, HTTP 기반) 추가 + `ErrorBody(resultCode, code, message)` 응답 노출, Lombok `@Getter` 전환 (TDD, `clean build` 통과)
 * [x] (2026-07-05) BE 전역(global) 기반 구성 (TDD)
   * `global.common.ApiResponse<T>` (성공/실패 공통 래퍼, nested `ErrorBody` record)
   * `global.common.BaseEntity` (`createdAt`/`updatedAt`, `@MappedSuperclass` + JPA Auditing)

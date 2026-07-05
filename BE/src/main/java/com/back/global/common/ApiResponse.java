@@ -1,15 +1,17 @@
 package com.back.global.common;
 
 import com.back.global.exception.ErrorCode;
+import lombok.Getter;
 
 /**
  * 모든 API 응답의 공통 래퍼.
  *
  * <pre>
  * 성공: { "success": true,  "data": {...}, "error": null }
- * 실패: { "success": false, "data": null,  "error": { "code": "...", "message": "..." } }
+ * 실패: { "success": false, "data": null,  "error": { "resultCode": 40001, "code": "...", "message": "..." } }
  * </pre>
  */
+@Getter
 public class ApiResponse<T> {
 
     private final boolean success;
@@ -35,21 +37,10 @@ public class ApiResponse<T> {
     }
 
     public static <T> ApiResponse<T> error(ErrorCode errorCode, String message) {
-        return new ApiResponse<>(false, null, new ErrorBody(errorCode.getCode(), message));
+        ErrorBody body = new ErrorBody(errorCode.getResultCode(), errorCode.getCode(), message);
+        return new ApiResponse<>(false, null, body);
     }
 
-    public boolean isSuccess() {
-        return success;
-    }
-
-    public T getData() {
-        return data;
-    }
-
-    public ErrorBody getError() {
-        return error;
-    }
-
-    public record ErrorBody(String code, String message) {
+    public record ErrorBody(int resultCode, String code, String message) {
     }
 }
