@@ -1,0 +1,89 @@
+# ARCHITECTURE-STATUTE
+
+아키텍처 구현 규칙. 구조가 바뀌면 이 문서를 갱신한다.
+
+---
+
+## 1. 기술 스택
+
+### Backend
+
+* 언어/런타임: Java 21
+* 프레임워크: Spring Boot 3.4.x (안정 버전 사용, 4.x는 사용하지 않는다)
+* 빌드: Gradle (Kotlin DSL, `build.gradle.kts`)
+* 데이터: Spring Data JPA + MySQL
+* 보안: Spring Security
+  * 자체 회원가입: JWT 기반 인증
+  * 소셜 로그인: OAuth2 (카카오/구글 등)
+* 실시간 채팅: WebSocket(STOMP) + Redis Pub/Sub
+* 파일 저장: AWS S3 (서울 리전) — `FileStorage` 인터페이스로 추상화
+
+### Frontend
+
+* Next.js (React)
+* 위치: `FE/`
+* 동일 BE API를 모바일 앱이 재사용할 수 있도록 API 소비 방식을 플랫폼 독립적으로 유지한다.
+
+---
+
+## 2. BE 패키지 구조
+
+도메인별 패키지 + 계층형 구조를 사용한다.
+
+```
+com.back
+├── domain
+│   ├── member
+│   │   ├── controller
+│   │   ├── service
+│   │   ├── repository
+│   │   ├── entity
+│   │   └── dto
+│   ├── verifiedperformer
+│   ├── feed
+│   ├── performance
+│   ├── recruitment
+│   └── chat
+└── global
+    ├── config          // 설정 (Security, WebSocket, JPA, S3 등)
+    ├── security        // 인증/인가, JWT, OAuth2
+    ├── exception       // 전역 예외 처리, 공통 예외, 에러 코드
+    ├── common          // BaseEntity, 공통 응답 래퍼 등
+    └── storage         // FileStorage 인터페이스 및 구현
+```
+
+* 각 도메인은 위 계층(controller/service/repository/entity/dto)을 자체적으로 갖는다.
+* 도메인 간 협력은 서비스 계층을 통해서만 한다.
+
+---
+
+## 3. 파일 저장 규칙
+
+* 파일 저장 접근은 반드시 `FileStorage` 인터페이스를 통해서만 한다. 도메인 서비스가 S3 SDK나 물리 경로를 직접 다루지 않는다.
+* 저장 결과는 물리 경로가 아니라 **논리 key + 접근 URL**로 다룬다.
+* 업로드는 서버 경유 방식으로 시작한다. (추후 필요 시 Presigned URL 직접 업로드로 확장 가능)
+* 업로드 파일 메타데이터(원본명, 크기, contentType, key)는 DB에 저장한다.
+* S3 자격증명·버킷명은 환경변수/설정으로 분리하며 저장소에 커밋하지 않는다.
+
+---
+
+## 4. 실시간 채팅 규칙
+
+* 클라이언트-서버 실시간 통신은 WebSocket(STOMP)으로 한다.
+* 다중 서버 확장을 대비해 메시지 브로드캐스트는 Redis Pub/Sub를 경유한다.
+* 채팅 메시지는 DB에 영속화한다. (히스토리 조회 지원)
+
+---
+
+## 5. 배포 (추후 결정)
+
+* Nginx 리버스 프록시(`/api` → BE, 그 외 → FE), HTTPS(SSL) 종료, WebSocket 프록시는 **배포 단계에서 결정**한다.
+* 로컬 개발 단계에서는 도입하지 않는다. (Next dev 서버 + Spring 직접 실행)
+
+---
+
+## 6. 테스트 규칙
+
+* 도메인별 단위 테스트와 통합 테스트를 작성한다.
+* 가능하면 TDD로 진행한다.
+* 모든 테스트/린트 통과를 작업 완료의 기준으로 한다.
