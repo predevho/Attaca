@@ -81,7 +81,7 @@ com.back.global.security
 - HS256, 시크릿 기반 `SecretKey`
 - 메서드(초안):
   - `String createAccessToken(Long userId, Role role)` — claims: `sub=userId`, `role="ROLE_x"`, `type="access"`, `iat`, `exp`
-  - `String createRefreshToken(Long userId)` — claims: `sub=userId`, `type="refresh"`, `iat`, `exp`
+  - `String createRefreshToken(Long userId, Role role)` — claims: `sub=userId`, `role="ROLE_x"`, `type="refresh"`, `iat`, `exp` (무상태 재발급 시 role을 알아야 하므로 refresh에도 role 포함)
   - `Claims parse(String token)` — 서명·만료 검증, 실패 시 jjwt 예외 전파
   - `Authentication getAuthentication(String token)` — principal=userId, authorities=`ROLE_x`
 - 만료/변조 등은 jjwt 예외(`ExpiredJwtException`, `SignatureException`, `MalformedJwtException`, `UnsupportedJwtException`)로 구분 → 호출측이 ErrorCode로 매핑
@@ -112,7 +112,7 @@ com.back.global.security
 
 ### 4.7 `AuthController` — `POST /api/auth/reissue`
 - 요청: `ReissueRequest { refreshToken }`
-- 처리: `JwtProvider.parse(refreshToken)` → `type=="refresh"` 확인 → `sub`로 새 access 발급
+- 처리: `JwtProvider.parse(refreshToken)` → `type=="refresh"` 확인 → `sub`+`role`로 새 access 발급 (무상태, DB 조회 없음)
 - 응답: `200 ApiResponse<TokenResponse>{ accessToken }`
 - 실패: `BusinessException(적절한 ErrorCode)` → `GlobalExceptionHandler`가 처리 (컨트롤러 단이므로 전역 핸들러 적용)
 - 무상태: 서버 저장/조회 없음

@@ -60,6 +60,13 @@ CONTEXT.md 규칙
 
 ---
 
+## 학습(TIL)
+
+- docs/TIL/ : 학습 기록(Today I Learned). 파일명은 `YYYY-MM-DD-주제.md`
+- 노션 TIL DB의 정본이며, 노션은 이 내용을 요약·미러링한다.
+
+---
+
 # 문서 규칙
 
 ## 읽기
@@ -115,6 +122,7 @@ CONTEXT.md 규칙
 - 작업 로그 → docs/AI-ACTION-LOGS.md
 - 중요한 결정/사건 → docs/AI-MAJOR-EVENT.md
 - 중요한 결정/사건 요약 → docs/AI-MAJOR-EVENT-RECAP.md
+- 새 학습 정리 → docs/TIL/YYYY-MM-DD-주제.md (후 노션 TIL DB에도 반영)
 
 ---
 
