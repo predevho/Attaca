@@ -55,9 +55,30 @@
 ## 4. 인증/인가
 
 * 위치: `com.back.global.security`
-* JWT 필터에서 토큰을 검증하고 SecurityContext에 인증 정보를 넣는다.
-* URL/메서드 단위로 권한(`ROLE_USER`, `ROLE_ADMIN`)을 검사한다.
-* OAuth2 로그인 성공 시 회원을 조회/생성하고 JWT를 발급한다.
+* 무상태(STATELESS) JWT 기반. 세션 미사용, `csrf`/`formLogin`/`httpBasic` 비활성.
+* 구성:
+  * `JwtProvider` : access/refresh 발급·파싱·검증(HS256, self-issued). 무상태 재발급을 위해 refresh 에도 role claim 포함.
+  * `JwtProperties` : `jwt.secret`(env 주입), access/refresh 만료(ms).
+  * `JwtAuthenticationFilter` : Bearer access 검증 → `SecurityContext` 세팅. 실패 시 사유 ErrorCode 를 request 속성에 저장.
+  * `SecurityConfig` : `SecurityFilterChain`(인가 규칙 + 필터·핸들러 등록), `PasswordEncoder`(BCrypt) 빈.
+  * `JwtAuthenticationEntryPoint`(401)/`JwtAccessDeniedHandler`(403) : 필터 체인 실패를 `ApiResponse` JSON 으로 직접 응답(전역 핸들러가 못 잡으므로).
+  * `Role`(enum USER/ADMIN, `authority()`→`ROLE_x`). MEMBER 의 `Member.role` 이 재사용.
+  * `AuthController` `POST /api/auth/reissue` : refresh 검증 후 새 access 재발급(무상태, DB 조회 없음).
+* 인가 규칙: `/api/auth/**` permit, `/api/admin/**` `hasRole("ADMIN")`, 그 외 `authenticated()`.
+* 인증 계열 ErrorCode:
+
+| 코드 | resultCode | 사유 |
+|---|---|---|
+| UNAUTHORIZED | 401-01 | 토큰 없음/미인증 |
+| MALFORMED_TOKEN | 401-02 | 형식 오류 |
+| INVALID_SIGNATURE | 401-03 | 서명 변조 |
+| EXPIRED_TOKEN | 401-04 | 만료 |
+| UNSUPPORTED_TOKEN | 401-05 | 미지원 |
+| INVALID_TOKEN_TYPE | 401-06 | reissue에 access 전달 등 |
+| FORBIDDEN | 403-01 | 권한 부족 |
+
+* 소셜 로그인(OAuth2): provider 인증 성공 → 회원 조회/생성 → 동일 `JwtProvider` 발급 흐름으로 수렴 (MEMBER 도메인에서 구현).
+* refresh 로테이션·철회는 추후 Redis 도입 시 추가(현재 무상태).
 
 ---
 

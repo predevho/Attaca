@@ -6,7 +6,7 @@
 
 ## 현재 상태
 
-* 단계: BE 전역(global) 기반 구성 완료(ApiResponse/BaseEntity/예외체계/JpaAuditing). 다음은 보안 기반(Security+JWT).
+* 단계: BE 전역 기반 + 보안 기반(Security+JWT) 골격 완료. 다음은 MEMBER 도메인(자체 회원가입/로그인) 또는 FileStorage/FE 초기화.
 * 확정된 기술 스택
   * BE: Spring Boot 3.4.x / Java 21 / MySQL / Spring Security(JWT + OAuth2) / WebSocket(STOMP)+Redis / S3(FileStorage 추상화)
   * FE: Next.js (React), 위치 `FE/` (아직 비어 있음)
@@ -20,6 +20,7 @@
 * 도메인 문서 없이 해당 도메인 구현 금지. 현재 문서화된 도메인: COMMON, MEMBER.
 * 코드 스타일: 단순 필드 접근자는 Lombok `@Getter`로 통일(수동 getter 금지).
 * 응답 에러 본문은 `ErrorBody(resultCode:String, code:String, message)`. `resultCode`는 `HTTP상태-일련번호` 문자열(400-01/405-01/500-01).
+* 보안: 무상태 JWT(access+refresh, `/api/auth/reissue`). `jwt.secret`은 env(`JWT_SECRET`) 주입·커밋 금지. 골격은 DB 불필요. 인증 ErrorCode 401-01~06, 403-01.
 
 ## 보류된 결정
 
