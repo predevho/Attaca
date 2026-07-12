@@ -52,6 +52,14 @@ com.back.domain.member
 
 * 자체 가입: email + password. 비밀번호는 해시(BCrypt 등)로 저장한다.
 * 로그인 성공 시 JWT(access, 필요 시 refresh)를 발급한다.
+
+### 3.1 확정된 API (구현 완료: 자체 가입/로그인, 2026-07-12)
+
+* `POST /api/auth/signup` : 자체 회원가입. body `{email, password, nickname}` → `SignupResponse{id, email, nickname, role}`. 인증 없이 접근 가능해야 하므로 `/api/auth/**`(permit) 아래 둔다.
+* `POST /api/auth/login` : 자체 로그인. body `{email, password}` → `TokenPairResponse{accessToken, refreshToken}`.
+* 위치: `com.back.domain.member`(controller/service/repository/entity/dto). `Member.role`은 `global.security.Role` 재사용.
+* 에러코드는 전역 `ErrorCode`에 추가한다(도메인 전용 enum 분리는 보류): `EMAIL_ALREADY_EXISTS`(409-01), `NICKNAME_ALREADY_EXISTS`(409-02), `LOGIN_FAILED`(401-07).
+* 로그인 실패는 이메일 부재/비밀번호 불일치를 구분하지 않고 동일하게 `LOGIN_FAILED`(401-07)로 응답한다(계정 존재 여부 노출 방지).
 * 소셜 로그인: OAuth2 인증 성공 → providerUserId로 SocialAccount 조회.
   * 존재하면 해당 회원으로 로그인.
   * 없으면 회원(Member) 신규 생성 후 SocialAccount 연결.
