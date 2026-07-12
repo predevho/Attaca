@@ -14,4 +14,5 @@
 * 2026-07-05 — TIL 문서 체계 시작: `docs/TIL/` 신설, `docs/TIL/2026-07-05-generics.md`(Java 제네릭 상세) 작성. 학습 기록용이며 코드/설계에 영향 없음.
 * 2026-07-05 — 노션 프로젝트 허브 구성(`AIBE6 기록` 워크스페이스): "Attaca 프로젝트" 페이지 + TODO/TIL/스케줄 DB(보드·캘린더 뷰) + 프로젝트 문서 4종. `CLAUDE.md`에 노션 동기화 규칙 추가.
 * 2026-07-05 — `resultCode` 포맷 변경: `int 40001` → `String "400-01"`(HTTP상태-일련번호, 가독성). `ErrorCode`/`ApiResponse.ErrorBody`/테스트/문서 반영, TDD(RED→GREEN) 후 `clean build` 통과.
-* 2026-07-07 — BE 보안 기반(Security+JWT) 골격 구현 완료(계획 Task1~5, TDD). `Role`/인증 ErrorCode 7종, `JwtProvider`/`JwtProperties`(jjwt 0.12.6), `JwtAuthenticationFilter`, `SecurityConfig`(STATELESS)+핸들러 2종, `AuthController(/api/auth/reissue)`. access+refresh 무상태(refresh에도 role claim). 테스트 5종 + `clean build` 통과. 커밋 5개(`5a76833`~`6da73cf`).
+* 2026-07-11 — BE 보안 기반(Security+JWT) 골격 구현 완료(계획 Task1~5, TDD). `Role`/인증 ErrorCode 7종, `JwtProvider`/`JwtProperties`(jjwt 0.12.6), `JwtAuthenticationFilter`, `SecurityConfig`(STATELESS)+핸들러 2종, `AuthController(/api/auth/reissue)`. access+refresh 무상태(refresh에도 role claim). 테스트 5종 + `clean build` 통과. 커밋 5개(`5a76833`~`6da73cf`).
+* 2026-07-12 — 날짜 오기 정정. 보안 골격 기록을 실제 커밋일 `07-11`로 수정(TODO-DONE, ACTION-LOGS). TIL은 작성일 기준 `07-12`로 통일(파일명 `2026-07-07-...`→`2026-07-12-...`, 본문 작성일, 노션 TIL `날짜` 속성). git 이력·실제 커밋일과 문서 날짜 불일치 해소.

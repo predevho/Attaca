@@ -1,6 +1,6 @@
 # TIL — Spring Security + JWT 무상태 인증 (한 문서로 이해하기)
 
-> 작성일: 2026-07-07
+> 작성일: 2026-07-12
 > 목적: Attaca의 보안 골격(`com.back.global.security`)에 쓰인 Spring Security 설정과 개념을, **이 문서 하나만 봐도** 흐름과 각 메서드의 의미를 이해할 수 있게 정리한다.
 > 관련 코드: `global.security` 패키지 / 규칙: `docs/DOMAIN-COMMON-STATUTE.md §4`
 
