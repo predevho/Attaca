@@ -18,7 +18,9 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-@WebMvcTest
+// 인가 규칙 자체를 검증하는 슬라이스 테스트. 실제 도메인 컨트롤러(서비스/JPA 의존)를 끌어오지 않도록
+// 이 테스트 전용 TestController 로 스캔 범위를 한정한다.
+@WebMvcTest(controllers = SecurityConfigTest.TestController.class)
 @Import({SecurityConfig.class,
         JwtAuthenticationEntryPoint.class,
         JwtAccessDeniedHandler.class,

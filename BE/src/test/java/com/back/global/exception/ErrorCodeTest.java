@@ -21,4 +21,16 @@ class ErrorCodeTest {
         assertThat(ErrorCode.FORBIDDEN.getResultCode()).isEqualTo("403-01");
         assertThat(ErrorCode.FORBIDDEN.getStatus()).isEqualTo(HttpStatus.FORBIDDEN);
     }
+
+    @Test
+    void memberErrorCodes_haveExpectedResultCodeAndStatus() {
+        assertThat(ErrorCode.EMAIL_ALREADY_EXISTS.getResultCode()).isEqualTo("409-01");
+        assertThat(ErrorCode.EMAIL_ALREADY_EXISTS.getStatus()).isEqualTo(HttpStatus.CONFLICT);
+
+        assertThat(ErrorCode.NICKNAME_ALREADY_EXISTS.getResultCode()).isEqualTo("409-02");
+        assertThat(ErrorCode.NICKNAME_ALREADY_EXISTS.getStatus()).isEqualTo(HttpStatus.CONFLICT);
+
+        assertThat(ErrorCode.LOGIN_FAILED.getResultCode()).isEqualTo("401-07");
+        assertThat(ErrorCode.LOGIN_FAILED.getStatus()).isEqualTo(HttpStatus.UNAUTHORIZED);
+    }
 }
