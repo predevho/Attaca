@@ -4,6 +4,15 @@
 
 ---
 
+* [x] (2026-07-13) MEMBER: 카카오 소셜 로그인 + 자체 로그인 loginId 전환 (TDD, subagent-driven)
+  * 식별자 역할 분리: `loginId`(자체 로그인, unique·nullable) / `email`(인증·소셜연결 키, 전원 필수) / `nickname`(활동명) / 내부 신원 `id`
+  * 자체 auth를 email→loginId 기반으로 개정(`SignupRequest{loginId,password,email,nickname}`, `login{loginId,password}`)
+  * 카카오 소셜: `POST /api/auth/oauth/kakao{code,redirectUri}` — 프론트 인가코드→백엔드 교환(`OAuthClient`/`KakaoOAuthClient`), `SocialAccount`(provider+providerUserId 유니크)
+  * 자동가입/자동연결: 검증된 이메일(is_email_verified)만 기존 회원 연결, 미검증 거절(계정 탈취 방지). nickname 충돌 시 유니크 생성
+  * 에러코드 추가: `LOGIN_ID_ALREADY_EXISTS`(409-03), `OAUTH_EMAIL_UNVERIFIED`(401-08), `OAUTH_PROVIDER_ERROR`(502-01). `LOGIN_FAILED` 문구를 아이디 기준으로 정정
+  * 카카오 키는 env 주입(`KAKAO_CLIENT_ID`/`KAKAO_CLIENT_SECRET`), 커밋 금지. 실제 카카오 HTTP는 운영 키로 수동 검증(자동 테스트는 매핑·로직만 Fake)
+  * 브랜치 `feature/member-oauth2-social-login`, 태스크 6개 TDD + 태스크별 리뷰, 전체 `clean build` 통과
+  * 범위 밖(BACKLOG): 구글 등 타 provider, 프로필/이미지, 실제 인증메일 발송
 * [x] (2026-07-12) MEMBER 도메인: 자체 회원가입/로그인 (TDD)
   * `domain.member`: `Member`(엔티티, email/password/nickname/role), `MemberRepository`(existsByEmail·existsByNickname·findByEmail), `MemberService`(signup·login), `MemberAuthController`
   * 엔드포인트: `POST /api/auth/signup`, `POST /api/auth/login`(access+refresh 발급) — 기존 `/api/auth/**` permit 재사용(SecurityConfig 미변경)

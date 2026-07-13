@@ -6,7 +6,7 @@
 
 ## 현재 상태
 
-* 단계: BE 전역 기반 + 보안 기반(Security+JWT) 골격 + MEMBER 자체 회원가입/로그인 완료. 다음은 MEMBER 소셜 로그인(OAuth2)/프로필 또는 FileStorage/FE 초기화.
+* 단계: BE 전역 기반 + 보안 골격 + MEMBER 자체(loginId) 가입/로그인 + 카카오 소셜 로그인 완료. 다음은 MEMBER 프로필/이미지(FileStorage 선행) 또는 구글 소셜 확장 또는 FE 초기화.
 * 확정된 기술 스택
   * BE: Spring Boot 3.4.x / Java 21 / MySQL / Spring Security(JWT + OAuth2) / WebSocket(STOMP)+Redis / S3(FileStorage 추상화)
   * FE: Next.js (React), 위치 `FE/` (아직 비어 있음)
@@ -20,8 +20,11 @@
 * 도메인 문서 없이 해당 도메인 구현 금지. 현재 문서화된 도메인: COMMON, MEMBER.
 * 코드 스타일: 단순 필드 접근자는 Lombok `@Getter`로 통일(수동 getter 금지).
 * 응답 에러 본문은 `ErrorBody(resultCode:String, code:String, message)`. `resultCode`는 `HTTP상태-일련번호` 문자열(400-01/405-01/500-01).
-* 보안: 무상태 JWT(access+refresh, `/api/auth/reissue`). `jwt.secret`은 env(`JWT_SECRET`) 주입·커밋 금지. 골격은 DB 불필요. 인증 ErrorCode 401-01~07, 403-01.
-* MEMBER: 자체 가입/로그인은 `/api/auth/signup`·`/api/auth/login`(둘 다 `/api/auth/**` permit). 로그인은 access+refresh 발급. 비번 BCrypt. MEMBER 에러코드는 전역 `ErrorCode`에 추가(EMAIL/NICKNAME_ALREADY_EXISTS 409-01/02, LOGIN_FAILED 401-07). `Member.role`은 `global.security.Role` 재사용.
+* 보안: 무상태 JWT(access+refresh, `/api/auth/reissue`). `jwt.secret`은 env(`JWT_SECRET`) 주입·커밋 금지. 인증 ErrorCode 401-01~08, 403-01.
+* MEMBER 식별자: `loginId`=자체 로그인 열쇠(unique, nullable) / `email`=인증·소셜연결 키(unique, 전원 필수) / `nickname`=활동명(unique) / 내부 신원=`id`. `password`/`loginId`는 소셜 전용 회원에서 null(자체 로그인 경로에 null 가드).
+* MEMBER API(모두 `/api/auth/**` permit): `POST /signup{loginId,password,email,nickname}`, `POST /login{loginId,password}`, `POST /oauth/kakao{code,redirectUri}`. 로그인/소셜 모두 access+refresh 발급. 비번 BCrypt.
+* 소셜: 프론트 인가코드→백엔드 교환(`OAuthClient`/`KakaoOAuthClient`). 검증된 이메일만 자동연결, 미검증 거절(401-08). 카카오 키는 env(`KAKAO_CLIENT_ID`/`KAKAO_CLIENT_SECRET`) 주입·커밋 금지.
+* MEMBER 에러코드(전역 `ErrorCode`): EMAIL/NICKNAME/LOGIN_ID_ALREADY_EXISTS 409-01/02/03, LOGIN_FAILED 401-07, OAUTH_EMAIL_UNVERIFIED 401-08, OAUTH_PROVIDER_ERROR 502-01.
 
 ## 보류된 결정
 
