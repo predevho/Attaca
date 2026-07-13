@@ -95,9 +95,9 @@ class MemberServiceTest {
     }
 
     @Test
-    void login_socialOnlyMemberWithNullPassword_throwsLoginFailed() {
+    void login_socialOnlyMember_cannotLoginByLoginId_throwsLoginFailed() {
         memberRepository.save(Member.createSocial("social@attaca.com", "소셜러"));
-        // 소셜 전용 회원은 loginId 가 없으므로 loginId 로 로그인 시도 자체가 실패
+        // 소셜 전용 회원은 loginId 가 없으므로 loginId/password 로그인 경로로는 인증할 수 없다
         assertThatThrownBy(() -> memberService.login(new LoginRequest("social@attaca.com", "raw-pw")))
                 .isInstanceOf(BusinessException.class)
                 .extracting("errorCode").isEqualTo(ErrorCode.LOGIN_FAILED);

@@ -5,6 +5,7 @@ import com.back.global.exception.BusinessException;
 import com.back.global.exception.ErrorCode;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.springframework.http.MediaType;
+import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
@@ -23,7 +24,10 @@ public class KakaoOAuthClient implements OAuthClient {
 
     public KakaoOAuthClient(OAuthProperties properties) {
         this.properties = properties;
-        this.restClient = RestClient.create();
+        SimpleClientHttpRequestFactory factory = new SimpleClientHttpRequestFactory();
+        factory.setConnectTimeout(5000);
+        factory.setReadTimeout(5000);
+        this.restClient = RestClient.builder().requestFactory(factory).build();
     }
 
     @Override
