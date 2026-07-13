@@ -90,6 +90,19 @@ class MemberOAuthServiceTest {
     }
 
     @Test
+    void unverifiedEmailMatchingExistingMember_isRejectedAndNotLinked() {
+        memberRepository.save(Member.createLocal("victim", "pw", "victim@attaca.com", "피해자"));
+        fakeClient.next = new OAuthUserInfo("kakao-attacker", "victim@attaca.com", false, "공격자");
+
+        assertThatThrownBy(() -> service.oauthLogin(OAuthProvider.KAKAO, "code", "https://app/cb"))
+                .isInstanceOf(BusinessException.class)
+                .extracting("errorCode").isEqualTo(ErrorCode.OAUTH_EMAIL_UNVERIFIED);
+
+        assertThat(memberRepository.findAll()).hasSize(1);
+        assertThat(socialAccountRepository.findAll()).isEmpty();
+    }
+
+    @Test
     void newSocialUser_nicknameCollision_generatesUnique() {
         memberRepository.save(Member.createLocal("id1", "pw", "a@attaca.com", "중복닉"));
         fakeClient.next = new OAuthUserInfo("kakao-3", "b@attaca.com", true, "중복닉");
