@@ -33,4 +33,16 @@ class ErrorCodeTest {
         assertThat(ErrorCode.LOGIN_FAILED.getResultCode()).isEqualTo("401-07");
         assertThat(ErrorCode.LOGIN_FAILED.getStatus()).isEqualTo(HttpStatus.UNAUTHORIZED);
     }
+
+    @Test
+    void oauthAndLoginIdErrorCodes_haveExpectedResultCodeAndStatus() {
+        assertThat(ErrorCode.LOGIN_ID_ALREADY_EXISTS.getResultCode()).isEqualTo("409-03");
+        assertThat(ErrorCode.LOGIN_ID_ALREADY_EXISTS.getStatus()).isEqualTo(HttpStatus.CONFLICT);
+
+        assertThat(ErrorCode.OAUTH_EMAIL_UNVERIFIED.getResultCode()).isEqualTo("401-08");
+        assertThat(ErrorCode.OAUTH_EMAIL_UNVERIFIED.getStatus()).isEqualTo(HttpStatus.UNAUTHORIZED);
+
+        assertThat(ErrorCode.OAUTH_PROVIDER_ERROR.getResultCode()).isEqualTo("502-01");
+        assertThat(ErrorCode.OAUTH_PROVIDER_ERROR.getStatus()).isEqualTo(HttpStatus.BAD_GATEWAY);
+    }
 }
