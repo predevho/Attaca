@@ -25,7 +25,7 @@ public enum ErrorCode {
     EXPIRED_TOKEN("401-04", HttpStatus.UNAUTHORIZED, "만료된 토큰입니다."),
     UNSUPPORTED_TOKEN("401-05", HttpStatus.UNAUTHORIZED, "지원하지 않는 토큰입니다."),
     INVALID_TOKEN_TYPE("401-06", HttpStatus.UNAUTHORIZED, "토큰 종류가 올바르지 않습니다."),
-    LOGIN_FAILED("401-07", HttpStatus.UNAUTHORIZED, "이메일 또는 비밀번호가 올바르지 않습니다."),
+    LOGIN_FAILED("401-07", HttpStatus.UNAUTHORIZED, "아이디 또는 비밀번호가 올바르지 않습니다."),
     FORBIDDEN("403-01", HttpStatus.FORBIDDEN, "접근 권한이 없습니다."),
 
     // --- MEMBER ---
