@@ -64,11 +64,16 @@ public class KakaoOAuthClient implements OAuthClient {
     }
 
     private KakaoUserResponse requestUser(String accessToken) {
-        return restClient.get()
+        KakaoUserResponse user = restClient.get()
                 .uri(properties.userInfoUri())
                 .header("Authorization", "Bearer " + accessToken)
                 .retrieve()
                 .body(KakaoUserResponse.class);
+
+        if (user == null) {
+            throw new BusinessException(ErrorCode.OAUTH_PROVIDER_ERROR);
+        }
+        return user;
     }
 
     /** 카카오 유저 응답을 표준 OAuthUserInfo 로 변환. (단위 테스트 대상) */
