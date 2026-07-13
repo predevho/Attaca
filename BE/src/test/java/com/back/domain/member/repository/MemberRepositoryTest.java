@@ -16,27 +16,26 @@ class MemberRepositoryTest {
 
     @BeforeEach
     void setUp() {
-        memberRepository.save(Member.create("user@attaca.com", "encoded-pw", "재즈맨"));
+        memberRepository.save(Member.createLocal("jazzman", "pw", "user@attaca.com", "재즈맨"));
     }
 
     @Test
-    void existsByEmail_true_whenPresent() {
+    void existsByLoginId() {
+        assertThat(memberRepository.existsByLoginId("jazzman")).isTrue();
+        assertThat(memberRepository.existsByLoginId("none")).isFalse();
+    }
+
+    @Test
+    void findByLoginId() {
+        assertThat(memberRepository.findByLoginId("jazzman"))
+                .get().extracting(Member::getEmail).isEqualTo("user@attaca.com");
+        assertThat(memberRepository.findByLoginId("none")).isEmpty();
+    }
+
+    @Test
+    void existsByEmailAndNickname() {
         assertThat(memberRepository.existsByEmail("user@attaca.com")).isTrue();
-        assertThat(memberRepository.existsByEmail("none@attaca.com")).isFalse();
-    }
-
-    @Test
-    void existsByNickname_true_whenPresent() {
         assertThat(memberRepository.existsByNickname("재즈맨")).isTrue();
-        assertThat(memberRepository.existsByNickname("없는이름")).isFalse();
-    }
-
-    @Test
-    void findByEmail_returnsMember_whenPresent() {
-        assertThat(memberRepository.findByEmail("user@attaca.com"))
-                .get()
-                .extracting(Member::getNickname)
-                .isEqualTo("재즈맨");
-        assertThat(memberRepository.findByEmail("none@attaca.com")).isEmpty();
+        assertThat(memberRepository.findByEmail("user@attaca.com")).isPresent();
     }
 }

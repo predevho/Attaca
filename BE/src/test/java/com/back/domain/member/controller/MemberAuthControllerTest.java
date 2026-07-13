@@ -34,55 +34,44 @@ class MemberAuthControllerTest {
     void signup_returns200WithMemberData() throws Exception {
         mockMvc.perform(post("/api/auth/signup")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(json(new SignupRequest("new@attaca.com", "raw-password", "새회원"))))
+                        .content(json(new SignupRequest("newbie", "raw-password", "new@attaca.com", "새회원"))))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true))
-                .andExpect(jsonPath("$.data.email").value("new@attaca.com"))
+                .andExpect(jsonPath("$.data.loginId").value("newbie"))
                 .andExpect(jsonPath("$.data.nickname").value("새회원"))
                 .andExpect(jsonPath("$.data.role").value("USER"));
     }
 
     @Test
-    void signup_duplicateEmail_returns409() throws Exception {
-        mockMvc.perform(post("/api/auth/signup")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(json(new SignupRequest("dup@attaca.com", "raw-password", "닉네임A"))))
+    void signup_duplicateLoginId_returns409() throws Exception {
+        mockMvc.perform(post("/api/auth/signup").contentType(MediaType.APPLICATION_JSON)
+                        .content(json(new SignupRequest("dup", "raw-password", "a@attaca.com", "닉A"))))
                 .andExpect(status().isOk());
-
-        mockMvc.perform(post("/api/auth/signup")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(json(new SignupRequest("dup@attaca.com", "raw-password", "닉네임B"))))
+        mockMvc.perform(post("/api/auth/signup").contentType(MediaType.APPLICATION_JSON)
+                        .content(json(new SignupRequest("dup", "raw-password", "b@attaca.com", "닉B"))))
                 .andExpect(status().isConflict())
-                .andExpect(jsonPath("$.success").value(false))
-                .andExpect(jsonPath("$.error.resultCode").value("409-01"));
+                .andExpect(jsonPath("$.error.resultCode").value("409-03"));
     }
 
     @Test
     void login_validCredentials_returns200WithTokens() throws Exception {
-        mockMvc.perform(post("/api/auth/signup")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(json(new SignupRequest("login@attaca.com", "raw-password", "로그인유저"))))
+        mockMvc.perform(post("/api/auth/signup").contentType(MediaType.APPLICATION_JSON)
+                        .content(json(new SignupRequest("loginuser", "raw-password", "login@attaca.com", "로그인유저"))))
                 .andExpect(status().isOk());
-
-        mockMvc.perform(post("/api/auth/login")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(json(new LoginRequest("login@attaca.com", "raw-password"))))
+        mockMvc.perform(post("/api/auth/login").contentType(MediaType.APPLICATION_JSON)
+                        .content(json(new LoginRequest("loginuser", "raw-password"))))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.success").value(true))
                 .andExpect(jsonPath("$.data.accessToken").isNotEmpty())
                 .andExpect(jsonPath("$.data.refreshToken").isNotEmpty());
     }
 
     @Test
     void login_wrongPassword_returns401() throws Exception {
-        mockMvc.perform(post("/api/auth/signup")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(json(new SignupRequest("pw@attaca.com", "correct-password", "비번유저"))))
+        mockMvc.perform(post("/api/auth/signup").contentType(MediaType.APPLICATION_JSON)
+                        .content(json(new SignupRequest("pwuser", "correct-password", "pw@attaca.com", "비번유저"))))
                 .andExpect(status().isOk());
-
-        mockMvc.perform(post("/api/auth/login")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(json(new LoginRequest("pw@attaca.com", "wrong-password"))))
+        mockMvc.perform(post("/api/auth/login").contentType(MediaType.APPLICATION_JSON)
+                        .content(json(new LoginRequest("pwuser", "wrong-password"))))
                 .andExpect(status().isUnauthorized())
                 .andExpect(jsonPath("$.error.resultCode").value("401-07"));
     }

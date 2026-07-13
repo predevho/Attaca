@@ -18,16 +18,28 @@ class MemberTest {
     private TestEntityManager entityManager;
 
     @Test
-    void create_defaultsToRoleUserAndPopulatesAuditing() {
-        Member member = Member.create("user@attaca.com", "encoded-pw", "재즈맨");
-
-        Member saved = entityManager.persistFlushFind(member);
+    void createLocal_populatesFieldsWithRoleUser() {
+        Member saved = entityManager.persistFlushFind(
+                Member.createLocal("jazzman", "encoded-pw", "user@attaca.com", "재즈맨"));
 
         assertThat(saved.getId()).isNotNull();
-        assertThat(saved.getEmail()).isEqualTo("user@attaca.com");
+        assertThat(saved.getLoginId()).isEqualTo("jazzman");
         assertThat(saved.getPassword()).isEqualTo("encoded-pw");
+        assertThat(saved.getEmail()).isEqualTo("user@attaca.com");
         assertThat(saved.getNickname()).isEqualTo("재즈맨");
         assertThat(saved.getRole()).isEqualTo(Role.USER);
         assertThat(saved.getCreatedAt()).isNotNull();
+    }
+
+    @Test
+    void createSocial_hasNullLoginIdAndPassword() {
+        Member saved = entityManager.persistFlushFind(
+                Member.createSocial("social@attaca.com", "소셜러"));
+
+        assertThat(saved.getId()).isNotNull();
+        assertThat(saved.getLoginId()).isNull();
+        assertThat(saved.getPassword()).isNull();
+        assertThat(saved.getEmail()).isEqualTo("social@attaca.com");
+        assertThat(saved.getRole()).isEqualTo(Role.USER);
     }
 }
