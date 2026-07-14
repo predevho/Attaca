@@ -79,4 +79,12 @@ class LocalFileStorageTest {
                 .extracting(e -> ((BusinessException) e).getErrorCode())
                 .isEqualTo(ErrorCode.INVALID_FILE);
     }
+
+    @Test
+    void 루트를_벗어나는_key는_삭제도_거절한다() {
+        assertThatThrownBy(() -> storage.delete("../evil.png"))
+                .isInstanceOf(BusinessException.class)
+                .extracting(e -> ((BusinessException) e).getErrorCode())
+                .isEqualTo(ErrorCode.INVALID_FILE);
+    }
 }

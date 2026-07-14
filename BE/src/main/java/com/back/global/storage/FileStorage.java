@@ -8,7 +8,7 @@ import java.io.InputStream;
  */
 public interface FileStorage {
 
-    /** 주어진 key 위치에 내용을 저장하고 저장된 key를 반환한다. */
+    /** 주어진 key 위치에 내용을 저장하고 저장된 key를 반환한다. 호출자가 {@code content} 스트림의 소유권을 가지며 닫아야 한다. */
     String upload(String key, InputStream content, long size, String contentType);
 
     /** key에 해당하는 파일을 삭제한다. 물리 파일이 이미 없어도 예외를 던지지 않는다(멱등). */
