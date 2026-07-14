@@ -1,6 +1,10 @@
 spring:
   application:
     name: attaca
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 10MB
 
 jwt:
   secret: ${JWT_SECRET:local-dev-secret-please-change-in-real-environment-0123456789}
@@ -13,3 +17,15 @@ oauth:
     client-secret: ${KAKAO_CLIENT_SECRET:}
     token-uri: https://kauth.kakao.com/oauth/token
     user-info-uri: https://kapi.kakao.com/v2/user/me
+
+storage:
+  type: ${STORAGE_TYPE:local}          # local | s3
+  local:
+    root-dir: ${STORAGE_LOCAL_ROOT:./uploads}
+    base-url: ${STORAGE_LOCAL_BASE_URL:http://localhost:8080/files}
+  s3:
+    bucket: ${S3_BUCKET:}
+    region: ${S3_REGION:ap-northeast-2}
+    access-key: ${AWS_ACCESS_KEY_ID:}
+    secret-key: ${AWS_SECRET_ACCESS_KEY:}
+    base-url: ${S3_BASE_URL:}          # CloudFront/R2 교체 지점
