@@ -35,7 +35,12 @@ public enum ErrorCode {
 
     // --- OAuth(소셜) ---
     OAUTH_EMAIL_UNVERIFIED("401-08", HttpStatus.UNAUTHORIZED, "소셜 계정의 이메일이 확인되지 않았습니다."),
-    OAUTH_PROVIDER_ERROR("502-01", HttpStatus.BAD_GATEWAY, "소셜 로그인 제공자 연동에 실패했습니다.");
+    OAUTH_PROVIDER_ERROR("502-01", HttpStatus.BAD_GATEWAY, "소셜 로그인 제공자 연동에 실패했습니다."),
+
+    // --- 파일 저장 ---
+    INVALID_FILE("400-02", HttpStatus.BAD_REQUEST, "올바르지 않은 파일입니다."),
+    FILE_NOT_FOUND("404-01", HttpStatus.NOT_FOUND, "파일을 찾을 수 없습니다."),
+    FILE_UPLOAD_FAILED("500-02", HttpStatus.INTERNAL_SERVER_ERROR, "파일 업로드에 실패했습니다.");
 
     private final String resultCode;
     private final HttpStatus status;
