@@ -36,3 +36,16 @@
 * **소셜 회원 스키마**: 소셜 전용 회원은 `loginId`/`password`가 null(자체 로그인 경로에 null 가드). `email`은 전원 필수(non-null)로 유지해 nullable 위험을 password 하나로 축소.
 * **provider 추상화**: `OAuthClient` 인터페이스로 provider 호출을 캡슐화. 카카오 먼저 구현, 구글 등은 어댑터만 추가하면 되도록 개방. 실제 카카오 HTTP 연동은 자동 테스트 범위 밖(env 키로 수동 검증), 자동 테스트는 매핑·서비스 로직만(Fake/H2).
 * **에러코드 정책 유지**: 도메인 전용 enum 분리는 계속 보류하고 전역 `ErrorCode`에 추가(409-03/401-08/502-01).
+
+---
+
+## 2026-07-14 — 파일 저장 기반(FileStorage) 구성 및 문서 충돌 해소
+
+### 주요 의사결정
+* **파일 메타데이터 구조 확정**: `ARCHITECTURE-STATUTE §3`("메타데이터는 DB에 저장")과 각 도메인이 자체 테이블을 두는 방식 사이에 문서 충돌이 있었음. **공용 `FileMetadata` 엔티티**(`storageKey`/`originalName`/`contentType`/`size`/`uploaderId`) 하나로 통일하기로 확정. 도메인마다 파일 테이블을 중복 정의하지 않고, 도메인 엔티티는 `storageKey`만 보관한다. `DOMAIN-COMMON-STATUTE §7`에 반영.
+* **책임 분리**: `FileStorage`(바이트 저장소, DB 모름)와 `FileService`(key 생성 + `FileStorage` 호출 + `FileMetadata` 영속화를 한 트랜잭션으로 묶는 파사드)를 분리. 도메인은 `FileStorage`를 직접 호출하지 않고 항상 `FileService`를 통한다.
+* **구현체 전환 지점**: 접근 URL을 `base-url + key`로만 구성해, 로컬↔S3 전환이나 향후 CloudFront/R2 도입이 `base-url` 설정 한 줄 교체로 끝나도록 설계.
+
+### 발견된 버그
+* **앱 전역 500→404 라우팅 버그**: 매칭되는 핸들러가 없는 모든 URL(파일 저장 기능과 무관, 앱 전역)에서 Spring이 던지는 `NoResourceFoundException`이 `GlobalExceptionHandler`의 catch-all(`@ExceptionHandler(Exception.class)`)에 걸려 500으로 잘못 응답되고 있었음을 이번 작업 중 발견. 일반 에러코드 `RESOURCE_NOT_FOUND`(404-02) 전용 핸들러를 추가해 404로 정정. 파일 저장 기능이 계기가 됐을 뿐, 수정 자체는 애플리케이션 전역에 적용된다.
+* **키 생성 취약점**: 원본 파일명에서 확장자를 추출할 때 점(`.`)이 파일명 맨 앞에 오는 dotfile(예: `.내파일`)을 "확장자 있음"으로 잘못 판단해, "원본 파일명은 key에 넣지 않는다"는 설계 규칙이 깨지고 한글 파일명이 그대로 공개 URL에 노출될 뻔한 문제를 리뷰 중 발견·수정.

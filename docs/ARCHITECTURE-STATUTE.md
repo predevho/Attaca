@@ -61,9 +61,13 @@ com.back
 
 * 파일 저장 접근은 반드시 `FileStorage` 인터페이스를 통해서만 한다. 도메인 서비스가 S3 SDK나 물리 경로를 직접 다루지 않는다.
 * 저장 결과는 물리 경로가 아니라 **논리 key + 접근 URL**로 다룬다.
+* 구현체는 둘이다. `storage.type` 설정으로 하나만 활성화된다.
+  * `local` (기본값) : `LocalFileStorage` — 로컬 디스크에 저장하고 `/files/**`로 서빙한다.
+  * `s3` : `S3FileStorage` — AWS SDK v2 사용.
+* 접근 URL은 `base-url + key`로 만든다. 이 `base-url`이 CloudFront/R2 등으로 갈아타는 **단일 교체 지점**이다.
 * 업로드는 서버 경유 방식으로 시작한다. (추후 필요 시 Presigned URL 직접 업로드로 확장 가능)
-* 업로드 파일 메타데이터(원본명, 크기, contentType, key)는 DB에 저장한다.
-* S3 자격증명·버킷명은 환경변수/설정으로 분리하며 저장소에 커밋하지 않는다.
+* 업로드 파일 메타데이터는 공용 `FileMetadata` 엔티티에 저장한다. (`DOMAIN-COMMON-STATUTE §7`)
+* S3 자격증명·버킷명은 환경변수로 분리하며 저장소에 커밋하지 않는다.
 
 ---
 
