@@ -47,6 +47,13 @@ class ErrorCodeTest {
     }
 
     @Test
+    void 매칭되지_않는_리소스_에러코드는_지정된_resultCode와_상태를_가진다() {
+        assertThat(ErrorCode.RESOURCE_NOT_FOUND.getResultCode()).isEqualTo("404-02");
+        assertThat(ErrorCode.RESOURCE_NOT_FOUND.getStatus()).isEqualTo(HttpStatus.NOT_FOUND);
+        assertThat(ErrorCode.RESOURCE_NOT_FOUND.getCode()).isEqualTo("RESOURCE_NOT_FOUND");
+    }
+
+    @Test
     void 파일_에러코드는_지정된_resultCode와_상태를_가진다() {
         assertThat(ErrorCode.INVALID_FILE.getResultCode()).isEqualTo("400-02");
         assertThat(ErrorCode.INVALID_FILE.getStatus()).isEqualTo(HttpStatus.BAD_REQUEST);
