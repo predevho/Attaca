@@ -16,7 +16,7 @@
   * 자체 회원가입: JWT 기반 인증
   * 소셜 로그인: OAuth2 (카카오/구글 등)
 * 실시간 채팅: WebSocket(STOMP) + Redis Pub/Sub
-* 파일 저장: AWS S3 (서울 리전) — `FileStorage` 인터페이스로 추상화
+* 파일 저장: `FileStorage` 인터페이스로 추상화 — 로컬 디스크(기본값, 개발용) / AWS S3 서울 리전(opt-in, `storage.type=s3`) 두 구현체
 
 ### Frontend
 

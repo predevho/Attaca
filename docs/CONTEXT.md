@@ -8,7 +8,7 @@
 
 * 단계: BE 전역 기반 + 보안 골격 + MEMBER 자체/카카오 로그인 + 파일 저장 기반(FileStorage) 완료. 다음은 MEMBER 프로필/이미지 또는 구글 소셜 확장 또는 FE 초기화.
 * 확정된 기술 스택
-  * BE: Spring Boot 3.4.x / Java 21 / MySQL / Spring Security(JWT + OAuth2) / WebSocket(STOMP)+Redis / S3(FileStorage 추상화)
+  * BE: Spring Boot 3.4.x / Java 21 / MySQL / Spring Security(JWT + OAuth2) / WebSocket(STOMP)+Redis / FileStorage 추상화(로컬 기본/S3 opt-in)
   * FE: Next.js (React), 위치 `FE/` (아직 비어 있음)
 * 도메인 6개: MEMBER, VERIFIED-PERFORMER, FEED, PERFORMANCE, RECRUITMENT(구인/구직), CHAT
 * 어드민: 별도 도메인 아님. MEMBER의 ROLE_ADMIN.
