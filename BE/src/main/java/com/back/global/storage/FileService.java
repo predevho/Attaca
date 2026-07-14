@@ -34,6 +34,9 @@ public class FileService {
         }
 
         String originalName = file.getOriginalFilename();
+        if (originalName == null || originalName.isBlank()) {
+            throw new BusinessException(ErrorCode.INVALID_FILE);
+        }
         String key = generateKey(directory, originalName);
 
         try (InputStream content = file.getInputStream()) {
@@ -85,7 +88,7 @@ public class FileService {
             return "";
         }
         int dot = originalName.lastIndexOf('.');
-        if (dot < 0 || dot == originalName.length() - 1) {
+        if (dot <= 0 || dot == originalName.length() - 1) {
             return "";
         }
         return originalName.substring(dot).toLowerCase(Locale.ROOT);

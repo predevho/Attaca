@@ -87,6 +87,40 @@ class FileServiceTest {
     }
 
     @Test
+    void 점으로_시작하는_숨김파일명은_원본명을_key에_노출하지_않는다() {
+        MockMultipartFile dotfile = new MockMultipartFile(
+                "file", ".내파일", "application/octet-stream", "x".getBytes(StandardCharsets.UTF_8));
+
+        StoredFile stored = fileService.upload(dotfile, "misc", null);
+
+        assertThat(stored.storageKey()).doesNotContain("내파일");
+        assertThat(stored.storageKey()).doesNotContain(".");
+    }
+
+    @Test
+    void 다중_점_파일명은_마지막_점_기준으로_확장자를_추출한다() {
+        MockMultipartFile multiDot = new MockMultipartFile(
+                "file", "archive.tar.gz", "application/gzip", "x".getBytes(StandardCharsets.UTF_8));
+
+        StoredFile stored = fileService.upload(multiDot, "misc", null);
+
+        assertThat(stored.storageKey()).endsWith(".gz");
+        assertThat(stored.storageKey()).doesNotContain("archive");
+        assertThat(stored.storageKey()).doesNotContain("tar");
+    }
+
+    @Test
+    void 원본_파일명이_null이면_거절한다() {
+        MockMultipartFile noName = new MockMultipartFile(
+                "file", null, "image/png", "hello".getBytes(StandardCharsets.UTF_8));
+
+        assertThatThrownBy(() -> fileService.upload(noName, "profile", 7L))
+                .isInstanceOf(BusinessException.class)
+                .extracting(e -> ((BusinessException) e).getErrorCode())
+                .isEqualTo(ErrorCode.INVALID_FILE);
+    }
+
+    @Test
     void 삭제하면_스토리지와_메타데이터에서_모두_사라진다() {
         StoredFile stored = fileService.upload(pngFile(), "profile", 7L);
 
