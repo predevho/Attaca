@@ -351,6 +351,8 @@ package com.back.global.storage;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import static org.assertj.core.api.Assertions.assertThatCode;
+
 import com.back.global.exception.BusinessException;
 import com.back.global.exception.ErrorCode;
 import java.io.ByteArrayInputStream;
@@ -405,8 +407,11 @@ class LocalFileStorageTest {
 
     @Test
     void 없는_파일을_삭제해도_예외를_던지지_않는다() {
-        storage.delete("profile/2026/07/14/does-not-exist.png");
-        // 예외 없이 통과하면 성공 (삭제는 멱등)
+        String key = "profile/2026/07/14/does-not-exist.png";
+
+        assertThatCode(() -> storage.delete(key)).doesNotThrowAnyException();
+
+        assertThat(tempDir.resolve(key)).doesNotExist();
     }
 
     @Test
@@ -849,6 +854,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.dao.DataIntegrityViolationException;
 
 @DataJpaTest
 class FileMetadataRepositoryTest {
@@ -889,7 +895,7 @@ class FileMetadataRepositoryTest {
 
         assertThatThrownBy(() -> fileMetadataRepository.saveAndFlush(FileMetadata.create(
                 "profile/2026/07/14/dup.png", "b.png", "image/png", 2L, null)))
-                .isInstanceOf(Exception.class);
+                .isInstanceOf(DataIntegrityViolationException.class);
     }
 }
 ```
