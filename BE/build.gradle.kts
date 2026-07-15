@@ -22,6 +22,7 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-data-jpa")
     implementation("org.springframework.boot:spring-boot-starter-security")
     implementation("org.springframework.boot:spring-boot-starter-web")
+    implementation("org.springframework.boot:spring-boot-starter-validation")
     implementation(platform("software.amazon.awssdk:bom:2.31.16"))
     implementation("software.amazon.awssdk:s3")
     implementation("io.jsonwebtoken:jjwt-api:0.12.6")

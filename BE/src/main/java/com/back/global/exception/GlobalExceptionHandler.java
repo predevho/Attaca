@@ -4,8 +4,11 @@ import com.back.global.common.ApiResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.multipart.support.MissingServletRequestPartException;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 /**
@@ -31,6 +34,37 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ApiResponse<Void>> handleNoResourceFoundException(NoResourceFoundException e) {
         ErrorCode errorCode = ErrorCode.RESOURCE_NOT_FOUND;
         log.warn("NoResourceFoundException: path={}", e.getResourcePath());
+        return ResponseEntity.status(errorCode.getStatus())
+                .body(ApiResponse.error(errorCode));
+    }
+
+    // @Valid 검증 실패. 첫 필드 오류를 메시지로 노출한다.
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<ApiResponse<Void>> handleMethodArgumentNotValid(MethodArgumentNotValidException e) {
+        ErrorCode errorCode = ErrorCode.INVALID_INPUT_VALUE;
+        String message = e.getBindingResult().getFieldErrors().stream()
+                .findFirst()
+                .map(error -> error.getField() + ": " + error.getDefaultMessage())
+                .orElse(errorCode.getMessage());
+        log.warn("MethodArgumentNotValidException: {}", message);
+        return ResponseEntity.status(errorCode.getStatus())
+                .body(ApiResponse.error(errorCode, message));
+    }
+
+    // 본문 파싱 실패(JSON 문법 오류, enum에 없는 값 등). 클라이언트 실수이므로 400.
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ResponseEntity<ApiResponse<Void>> handleHttpMessageNotReadable(HttpMessageNotReadableException e) {
+        ErrorCode errorCode = ErrorCode.INVALID_INPUT_VALUE;
+        log.warn("HttpMessageNotReadableException: {}", e.getMessage());
+        return ResponseEntity.status(errorCode.getStatus())
+                .body(ApiResponse.error(errorCode));
+    }
+
+    // multipart 필수 파트 누락.
+    @ExceptionHandler(MissingServletRequestPartException.class)
+    public ResponseEntity<ApiResponse<Void>> handleMissingServletRequestPart(MissingServletRequestPartException e) {
+        ErrorCode errorCode = ErrorCode.INVALID_INPUT_VALUE;
+        log.warn("MissingServletRequestPartException: part={}", e.getRequestPartName());
         return ResponseEntity.status(errorCode.getStatus())
                 .body(ApiResponse.error(errorCode));
     }
