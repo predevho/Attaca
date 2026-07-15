@@ -42,8 +42,9 @@ export default function ProfilePage() {
 
   function toggleInstrument(code: string) {
     setDraftInstruments((cur) => {
-      if (cur.includes(code)) return cur.filter((c) => c !== code);
+      if (cur.includes(code)) { setError(null); return cur.filter((c) => c !== code); }
       if (cur.length >= MAX_INSTRUMENTS) { setError(`악기는 최대 ${MAX_INSTRUMENTS}개까지 선택할 수 있습니다.`); return cur; }
+      setError(null);
       return [...cur, code];
     });
   }
