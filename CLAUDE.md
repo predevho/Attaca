@@ -49,6 +49,8 @@ CONTEXT.md 규칙
 - docs/DOMAIN-COMMON-STATUTE.md : 공통 도메인 규칙
 - docs/DOMAIN-MEMBER-CONSTITUTION.md : 회원 도메인 원칙
 - docs/DOMAIN-MEMBER-STATUTE.md : 회원 도메인 규칙
+- docs/DOMAIN-VERIFIED-PERFORMER-CONSTITUTION.md : 인증 연주자 도메인 원칙
+- docs/DOMAIN-VERIFIED-PERFORMER-STATUTE.md : 인증 연주자 도메인 규칙
 
 ---
 

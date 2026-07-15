@@ -76,3 +76,15 @@
 * **CORS 미도입**: BFF라 브라우저 경로가 same-origin이고 Next→Spring은 서버 간 호출이라 CORS(브라우저 기제)가 불필요. 당초 BACKLOG의 CORS 항목을 닫고, 모바일 앱 등 직접 호출 소비처가 생기면 재도입하기로 함.
 * **통신 방식**: 네이티브 fetch만 사용. axios·React Query는 현 규모에 과함. 통신 지연 대응·대규모 상태 동기화가 필요해지면 React Query 재검토(사용자 확인).
 * **미들웨어 보호 범위**: `/dashboard`는 쿠키 '존재'만 검사(서명 검증 안 함) — FE에 JWT 시크릿을 두지 않기 위함. 실제 검증은 BE가 API 호출 때 수행하고 만료는 reissue가 처리.
+
+---
+
+## 2026-07-15 — VERIFIED-PERFORMER 도메인 설계 확정 (문서화)
+
+### 주요 의사결정
+* **인증 상태의 소유권**: `Member`에 boolean을 두지 않고 별도 엔티티 `VerificationApplication`이 소유. 인증은 참/거짓이 아니라 신청/심사/철회 워크플로이므로 그 관리 책임은 이 도메인의 것(ARCHITECTURE-CONSTITUTION §4). 뱃지는 MEMBER 프로필 조회 시 `isVerified` 서비스 협력으로 `ProfileResponse.verified`에 파생 노출.
+* **상태 머신 4종**: PENDING/APPROVED/REJECTED/REVOKED. 승인 철회 가능, 거절·철회 후 재신청 가능. 재신청은 기존 레코드를 덮지 않고 **새 레코드**로 이력 보존. 활성 신청은 회원당 하나(PENDING·APPROVED 존재 시 신규 거절).
+* **심사 근거**: 자기서술(statement) + 증빙 URL 링크(evidenceUrls). 파일 첨부는 범위 밖(추후 FileService 확장).
+* **어드민 직접지정 허용**: 신청 절차 없이 어드민이 APPROVED 레코드 생성(statement/evidence 없음). 심사·지정은 `/api/admin/**`(ROLE_ADMIN)로만.
+* **공개 범위는 뱃지만**: 공개 인증자 목록/페이지는 이 도메인 문서 범위 밖. 실제 소비처(FEED 등) 생길 때 설계.
+* **이번 산출물은 문서만**: CONSTITUTION/STATUTE 작성까지. 코드 구현은 별도 후속 작업.

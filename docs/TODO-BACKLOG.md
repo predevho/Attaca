@@ -6,7 +6,7 @@
 
 ## 도메인 문서화 (구현 전 필수)
 
-* [ ] DOMAIN-VERIFIED-PERFORMER-CONSTITUTION.md / STATUTE.md
+* [x] ~~DOMAIN-VERIFIED-PERFORMER-CONSTITUTION.md / STATUTE.md~~ (2026-07-15 작성 완료)
 * [ ] DOMAIN-FEED-CONSTITUTION.md / STATUTE.md
 * [ ] DOMAIN-PERFORMANCE-CONSTITUTION.md / STATUTE.md
 * [ ] DOMAIN-RECRUITMENT-CONSTITUTION.md / STATUTE.md
@@ -16,8 +16,9 @@
 
 * [ ] MEMBER: 소셜 로그인 provider 확장(구글 등 — `OAuthClient` 어댑터 추가) *(카카오는 2026-07-13 완료)*
 * [ ] MEMBER: 실제 인증메일 발송(가입 이메일 검증) — 메일 인프라 도입 시
-* [ ] VERIFIED-PERFORMER: 인증 연주자 신청 → 어드민 승인/거절, 공개 프로필 게시
-  * 설계 메모(2026-07-15): 프로필의 "인증 음악가" 뱃지는 Member에 boolean 컬럼을 추가하지 않는다. 인증 상태는 이 도메인 소유의 별도 엔티티(상태 워크플로: 신청/승인/거절 + 이력)로 관리하고, 뱃지는 조회 시 서비스 계층 협력으로 `ProfileResponse`에 파생 노출한다. (도메인 경계 원칙 — ARCHITECTURE-CONSTITUTION §4)
+* [ ] VERIFIED-PERFORMER: 인증 연주자 신청 → 어드민 승인/거절/철회, 뱃지 (구현 — 문서는 2026-07-15 완료)
+  * 설계 확정(2026-07-15, DOMAIN-VERIFIED-PERFORMER-*): 별도 엔티티 `VerificationApplication`, 상태 4종(PENDING/APPROVED/REJECTED/REVOKED), 재신청=새 레코드, 어드민 직접지정. 뱃지는 MEMBER `ProfileResponse.verified`로 파생 노출(`isVerified` 서비스 협력). 에러코드 409-04~06/404-04. Member에 boolean 미추가.
+  * 공개 인증자 목록/신청 첨부파일/이력 테이블은 범위 밖(추후).
 * [ ] FEED: 게시글/댓글/좋아요, 피드 타임라인
 * [ ] PERFORMANCE: 연주회 등록·홍보, 피드 카드 노출 연동
 * [ ] RECRUITMENT: 구인/구직 공고 + 지원

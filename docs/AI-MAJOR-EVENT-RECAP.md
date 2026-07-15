@@ -24,3 +24,7 @@
 * **2026-07-15 FE 초기화 + 인증(BFF)**: Next.js 16으로 FE 시작. BFF+httpOnly 쿠키로 토큰을 UI에서 격리.
   * 회원가입/로그인/대시보드 + 미들웨어 보호 + reissue 1회 재시도
   * CORS는 BFF라 미도입(브라우저 same-origin), 통신은 네이티브 fetch(라이브러리 미도입)
+  * 브라우저 E2E 6단계 검증(토큰 JS 미노출 확인). PC env DB_PASSWORD=1234가 bootRun 막던 문제 발견·해결
+* **2026-07-15 VERIFIED-PERFORMER 도메인 문서화**: 인증 연주자 도메인 CONSTITUTION/STATUTE 작성(코드는 후속).
+  * 인증 상태를 Member boolean이 아닌 별도 엔티티로 소유. 상태 4종(PENDING/APPROVED/REJECTED/REVOKED), 재신청=새 레코드, 어드민 직접지정·철회 가능
+  * 뱃지는 MEMBER ProfileResponse.verified로 파생(서비스 협력). 심사는 ROLE_ADMIN. 공개목록은 범위 밖

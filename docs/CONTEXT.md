@@ -20,7 +20,7 @@
   * ⚠️ 이 개발 PC엔 시스템 환경변수 `DB_PASSWORD=1234`가 설정돼 있어 compose 기본값(`attaca-local`)을 덮어써 `bootRun`이 `Access denied`로 실패한다. 해결: `gradlew bootRun --args=--spring.datasource.password=attaca-local`로 override(명령행이 env보다 우선)하거나 `DB_PASSWORD`를 unset. compose 볼륨이 낡으면 `docker compose down -v` 후 재기동.
 * 테스트는 H2 `test` 프로파일: `@SpringBootTest`에는 반드시 `@ActiveProfiles("test")`를 붙일 것(없으면 MySQL 접속 시도로 실패). `application-test.yaml`이 datasource/storage 루트를 덮어쓴다.
 * 검증: Bean Validation 도입(`@Valid`). 검증 실패·본문 파싱 실패(enum 오타)·multipart 파트 누락은 400-01로 매핑(과거 500 결함 수정).
-* 도메인 문서 없이 해당 도메인 구현 금지. 현재 문서화된 도메인: COMMON, MEMBER.
+* 도메인 문서 없이 해당 도메인 구현 금지. 현재 문서화된 도메인: COMMON, MEMBER, VERIFIED-PERFORMER(문서만, 구현 전).
 * 코드 스타일: 단순 필드 접근자는 Lombok `@Getter`로 통일(수동 getter 금지).
 * 응답 에러 본문은 `ErrorBody(resultCode:String, code:String, message)`. `resultCode`는 `HTTP상태-일련번호` 문자열(400-01/405-01/500-01).
 * 보안: 무상태 JWT(access+refresh, `/api/auth/reissue`). `jwt.secret`은 env(`JWT_SECRET`) 주입·커밋 금지. 인증 ErrorCode 401-01~08, 403-01.
