@@ -33,13 +33,13 @@ com.back.domain.member
 
 > 자체 로그인 열쇠는 `loginId`, 이메일은 인증·연락 및 소셜 자동연결 매칭 키다. 내부 신원은 `id`.
 
-### MemberProfile
+### MemberProfile (구현 완료, 2026-07-15)
 * id
-* member (Member 연관)
-* instruments (다룰 수 있는 악기 — 다중)
-* genres (선호 장르 — 다중)
-* bio (자기소개)
-* profileImageKey (업로드는 `FileService` 경유. **URL은 저장하지 않는다** — `FileService.getUrl(key)`로 생성, `DOMAIN-COMMON-STATUTE §7`)
+* member (Member 1:1 단방향, `member_id` unique — Member 쪽엔 참조 없음)
+* instruments (`Instrument` enum 21종, `@ElementCollection` `member_profile_instrument`. 장르 필드는 2026-07-15 리뷰에서 제외 — 클래식 중심)
+* bio (자기소개, 최대 500자)
+* profileImageKey (`FileService` 경유 업로드. URL은 저장하지 않고 `FileService.getUrl`로 생성)
+* 생성 시점: 가입 시 만들지 않고 첫 수정/이미지 업로드 때 생성(lazy upsert)
 
 ### SocialAccount (구현 완료, 2026-07-13)
 * id
@@ -47,8 +47,6 @@ com.back.domain.member
 * provider (`OAuthProvider` enum. 현재 KAKAO. 이후 GOOGLE 등 확장)
 * providerUserId (소셜 측 고유 식별자)
 * (provider + providerUserId 조합 유니크)
-
-> 악기/장르를 문자열 목록으로 둘지 별도 코드 테이블로 둘지는 구현 시 결정한다.(MemberProfile은 미구현)
 
 ---
 
@@ -75,6 +73,14 @@ com.back.domain.member
   * **이메일 미검증/미제공 → `OAUTH_EMAIL_UNVERIFIED` 거절** (미검증 이메일 자동연결은 계정 탈취 벡터이므로 금지)
 * 카카오 `client-id`/`client-secret`은 env(`KAKAO_CLIENT_ID`/`KAKAO_CLIENT_SECRET`) 주입, 커밋 금지.
 * 두 방식(자체/소셜) 모두 동일한 `JwtProvider` access+refresh 발급으로 수렴한다.
+
+### 3.2 프로필 API (구현 완료, 2026-07-15 — 모두 인증 필요, principal = JWT 회원 id)
+
+* `GET /api/members/me/profile` : 내 프로필. 미생성 시 빈 기본값(404 아님) → `ProfileResponse{instruments[], bio, profileImageUrl}`
+* `PUT /api/members/me/profile` : 전체 교체 upsert. body `{instruments: [코드], bio}` (악기 최대 10개, bio 최대 500자)
+* `PUT /api/members/me/profile/image` : multipart(`file`) 이미지 교체. `image/*`만 허용(위반 시 400-02), 새 파일 저장 확정 후 옛 파일 삭제
+* `GET /api/members/profile-options` : 악기 선택지 `{code, label}` 목록
+* 에러코드 추가: `MEMBER_NOT_FOUND`(404-03)
 
 ---
 

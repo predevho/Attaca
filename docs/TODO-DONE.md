@@ -4,6 +4,12 @@
 
 ---
 
+* [x] (2026-07-15) BE 런타임 DB(MySQL) + MEMBER 프로필/이미지 (TDD, subagent-driven)
+  * 런타임 DB: 레포 루트 docker-compose(MySQL 8.4) + datasource env 기본값 + `ddl-auto: update`. 테스트는 `application-test.yaml`(H2) 프로파일 분리(`@SpringBootTest`에 `@ActiveProfiles("test")`)
+  * `MemberProfile`(1:1 단방향, lazy upsert) + `Instrument` enum 21종(장르는 리뷰에서 제외, VOICE/VOCAL 분리)
+  * API 4종: `GET/PUT /api/members/me/profile`, `PUT /api/members/me/profile/image`(image/* 검증, 교체 시 옛 파일 삭제), `GET /api/members/profile-options`
+  * Bean Validation 도입 + 전역 예외 400 매핑 3건(@Valid 실패/본문 파싱 실패/파트 누락 — 기존 500 결함 수정), `MEMBER_NOT_FOUND`(404-03)
+  * 파일 저장 계층(FileService)의 첫 실사용처
 * [x] (2026-07-14) 파일 저장 기반(FileStorage) 구성 (TDD)
   * `global.storage`: `FileStorage`(인터페이스) / `LocalFileStorage`(기본) / `S3FileStorage`(AWS SDK v2) / `StorageProperties`
   * `FileService.upload(MultipartFile, String directory, Long uploaderId)` — key 생성(`{디렉터리}/{yyyy}/{MM}/{dd}/{UUID}.{확장자}`) + 저장 + `FileMetadata` 영속화를 한 트랜잭션으로 조합
