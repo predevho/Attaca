@@ -4,6 +4,13 @@
 
 ---
 
+* [x] (2026-07-15) FE Next.js 초기화 + 인증 플로우(BFF) (TDD, subagent-driven)
+  * Next 16(App Router)/React 19/TS/Tailwind/Vitest 스캐폴딩, 위치 `FE/`
+  * BFF 3계층: `lib/server/*`(beClient·cookies·session) / `app/api/bff/**`(signup·login·logout·me) / UI. 토큰은 httpOnly 쿠키, UI 미접근
+  * 화면: 회원가입/로그인/대시보드(+루트 리다이렉트), `/dashboard`는 미들웨어 보호
+  * reissue 1회 재시도(`session.ts`), 대시보드가 `/api/bff/me`(인증 프로브)로 전체 경로 검증
+  * 통신은 네이티브 fetch(라이브러리 미도입). CORS는 BFF라 미추가
+  * Vitest 단위 테스트(unwrap·cookies·beClient·session·bff·api·폼 스모크). 실BE 연동은 수동 검증
 * [x] (2026-07-15) BE 런타임 DB(MySQL) + MEMBER 프로필/이미지 (TDD, subagent-driven)
   * 런타임 DB: 레포 루트 docker-compose(MySQL 8.4) + datasource env 기본값 + `ddl-auto: update`. 테스트는 `application-test.yaml`(H2) 프로파일 분리(`@SpringBootTest`에 `@ActiveProfiles("test")`)
   * `MemberProfile`(1:1 단방향, lazy upsert) + `Instrument` enum 21종(장르는 리뷰에서 제외, VOICE/VOCAL 분리)

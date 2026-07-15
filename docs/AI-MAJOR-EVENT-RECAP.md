@@ -21,3 +21,6 @@
 * **2026-07-15 런타임 DB + MEMBER 프로필**: docker-compose MySQL로 `bootRun` 가능해짐(테스트는 H2 프로파일 분리).
   * 프로필: 악기 enum 21종(VOICE=성악/VOCAL=보컬 분리, 장르 제외), lazy upsert, 이미지는 FileService 경유(교체 시 옛 파일 삭제)
   * Bean Validation 도입, 클라이언트 실수 3종이 500으로 응답되던 결함을 400으로 정정
+* **2026-07-15 FE 초기화 + 인증(BFF)**: Next.js 16으로 FE 시작. BFF+httpOnly 쿠키로 토큰을 UI에서 격리.
+  * 회원가입/로그인/대시보드 + 미들웨어 보호 + reissue 1회 재시도
+  * CORS는 BFF라 미도입(브라우저 same-origin), 통신은 네이티브 fetch(라이브러리 미도입)
