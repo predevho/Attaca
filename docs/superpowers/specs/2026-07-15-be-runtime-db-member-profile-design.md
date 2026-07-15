@@ -15,7 +15,7 @@
 
 1. **런타임 DB 구성**: 현재 H2가 `testRuntimeOnly`뿐이라 `bootRun`으로 서버를 띄울 수 없다.
    Docker Compose 기반 MySQL을 붙여 로컬 서버 기동을 가능하게 한다. (FE 연동·수동 검증의 선행 조건)
-2. **MEMBER 프로필**: 악기/장르/자기소개 + 프로필 이미지 업로드. 파일 저장 계층(`FileService`)의
+2. **MEMBER 프로필**: 악기/자기소개 + 프로필 이미지 업로드. 파일 저장 계층(`FileService`)의
    첫 실사용처다.
 
 ### 범위 (In)
@@ -23,13 +23,15 @@
 - `docker-compose.yml`(레포 루트) — MySQL 8.4 로컬 개발용
 - `application.yaml`에 `spring.datasource`(env 기본값) + `mysql-connector-j`(runtimeOnly)
 - 테스트 프로파일 분리: `src/test/resources/application-test.yaml`(H2) + `@SpringBootTest`류에 `@ActiveProfiles("test")`
-- `MemberProfile` 엔티티(1:1, lazy upsert) + `Instrument`/`Genre` enum
+- `MemberProfile` 엔티티(1:1, lazy upsert) + `Instrument` enum
 - API 4개: 내 프로필 GET/PUT, 프로필 이미지 PUT, 프로필 선택지 GET
 - Bean Validation 도입(`spring-boot-starter-validation`) + 전역 예외 처리기 보강 3건
 - `ErrorCode` 추가: `MEMBER_NOT_FOUND`(404-03)
 
 ### 범위 밖 (Out)
 
+- **장르(Genre) 필드** — 리뷰(2026-07-15)에서 제외 확정. 서비스가 당분간 클래식 중심이라 장르
+  구분의 실익이 없다. 필요해지면 그때 enum과 컬렉션 테이블을 추가한다(값 추가는 하위호환).
 - **다른 회원 프로필 조회** — "공개 범위" 정책이 없다. FEED/VERIFIED-PERFORMER 등 실제 소비처가
   생길 때 그 요구에 맞춰 추가한다.
 - **프로필 이미지 삭제 API** — 교체만 지원. 삭제는 FE 요구가 생기면.
@@ -134,14 +136,13 @@ spring:
 | `id` | Long | PK |
 | `member` | Member | `@OneToOne(fetch = LAZY)`, `member_id` unique·non-null. **단방향** — Member 쪽엔 필드를 추가하지 않는다 |
 | `instruments` | `Set<Instrument>` | `@ElementCollection(fetch = LAZY)` + `@Enumerated(STRING)`, 테이블 `member_profile_instrument` |
-| `genres` | `Set<Genre>` | 동일 패턴, 테이블 `member_profile_genre` |
 | `bio` | String | nullable, 최대 500자(`@Column(length = 500)`) |
 | `profileImageKey` | String | nullable. **URL은 저장하지 않는다**(COMMON §7, `FileService.getUrl`로 생성) |
 
 - **생성 시점: lazy upsert.** 가입 시 자동 생성하지 않는다. 첫 `PUT /me/profile` 또는 첫 이미지
   업로드 때 없으면 만든다. GET은 프로필이 없으면 **빈 기본값 응답**(404 아님) — FE가 편집 화면을
   그리기 쉽다.
-- 변경 메서드: `updateInfo(Set<Instrument>, Set<Genre>, String bio)` / `changeImage(String newKey)`
+- 변경 메서드: `updateInfo(Set<Instrument>, String bio)` / `changeImage(String newKey)`
   (setter 금지, 의도가 드러나는 메서드).
 - 컬렉션을 `Set`으로 두는 이유: 중복 선택 무의미 + `@ElementCollection` 전체 교체 시맨틱과 맞음.
 
@@ -155,13 +156,10 @@ spring:
 | 목관 | FLUTE(플루트), OBOE(오보에), CLARINET(클라리넷), BASSOON(바순) |
 | 금관 | HORN(호른), TRUMPET(트럼펫), TROMBONE(트롬본), TUBA(튜바) |
 | 건반 | PIANO(피아노), ORGAN(오르간) |
-| 밴드/대중 | GUITAR(기타), BASS_GUITAR(베이스 기타), DRUMS(드럼) |
-| 기타 | PERCUSSION(타악기), VOCAL(보컬), COMPOSITION(작곡), CONDUCTING(지휘), ETC(그 외) |
+| 기타 | PERCUSSION(타악기), VOICE(보컬), COMPOSITION(작곡), CONDUCTING(지휘), ETC(그 외) |
 
-### 3-3. Genre enum (초안)
-
-CLASSICAL(클래식), JAZZ(재즈), POP(팝), ROCK(록), BAND(밴드), CCM(CCM), MUSICAL(뮤지컬),
-OST(OST), KPOP(K-POP), KOREAN_TRADITIONAL(국악), ETC(그 외)
+- 리뷰(2026-07-15) 반영: 밴드/대중 악기(GUITAR/BASS_GUITAR/DRUMS)는 서비스가 당분간 취급하지
+  않아 제외. `VOCAL`은 사용자 선호에 따라 **`VOICE`** 코드를 사용(가독성).
 
 - enum 확장은 값 추가만으로 끝난다(하위호환). 값 삭제/개명은 기존 데이터 마이그레이션이 필요하므로
   주요 결정으로 기록 후 진행.
@@ -180,10 +178,10 @@ repository `MemberProfileRepository`, dto).
 응답 `ProfileResponse`:
 
 ```json
-{ "instruments": ["VIOLIN"], "genres": ["CLASSICAL"], "bio": "...", "profileImageUrl": "http://.../files/profile/..." }
+{ "instruments": ["VIOLIN"], "bio": "...", "profileImageUrl": "http://.../files/profile/..." }
 ```
 
-- 프로필 미생성 시: `instruments`/`genres` 빈 배열, `bio`/`profileImageUrl` null.
+- 프로필 미생성 시: `instruments` 빈 배열, `bio`/`profileImageUrl` null.
 - `profileImageUrl`은 `profileImageKey`가 있을 때만 `FileService.getUrl(key)`로 생성.
 
 ### 4-2. `PUT /api/members/me/profile`
@@ -191,11 +189,11 @@ repository `MemberProfileRepository`, dto).
 요청 `UpdateProfileRequest`:
 
 ```json
-{ "instruments": ["VIOLIN", "PIANO"], "genres": ["CLASSICAL"], "bio": "안녕하세요" }
+{ "instruments": ["VIOLIN", "PIANO"], "bio": "안녕하세요" }
 ```
 
 - **전체 교체(upsert)**. 프로필이 없으면 생성한다. `null` 목록은 빈 목록으로 간주.
-- 검증(Bean Validation): `instruments`/`genres` 각 최대 10개(`@Size(max = 10)`),
+- 검증(Bean Validation): `instruments` 최대 10개(`@Size(max = 10)`),
   `bio` 최대 500자(`@Size(max = 500)`).
 - 응답: 갱신된 `ProfileResponse`.
 
@@ -215,7 +213,7 @@ repository `MemberProfileRepository`, dto).
 FE가 선택지를 하드코딩하지 않도록 enum 목록 제공.
 
 ```json
-{ "instruments": [{"code": "VIOLIN", "label": "바이올린"}, ...], "genres": [{"code": "CLASSICAL", "label": "클래식"}, ...] }
+{ "instruments": [{"code": "VIOLIN", "label": "바이올린"}, ...] }
 ```
 
 ### 4-5. 회원 부재 처리
@@ -258,9 +256,9 @@ JWT는 유효하지만 해당 회원이 DB에 없는 경우(탈퇴 등 엣지) `
 
 ## 7. 문서 반영 (구현 완료 시)
 
-- `DOMAIN-MEMBER-STATUTE` §2(MemberProfile 구현 반영·enum 확정), §5(API 4개 확정 기재)
+- `DOMAIN-MEMBER-STATUTE` §2(MemberProfile 구현 반영·`Instrument` enum 확정, **초안의 `genres` 필드 삭제**), §5(API 4개 확정 기재)
 - `ARCHITECTURE-STATUTE` §1(datasource·docker-compose 언급)
 - `CONTEXT.md` — bootRun 가능해짐(docker compose 사용법 한 줄), 테스트 프로파일 주의, 낡은 "bootRun 불가" 항목 교체
-- `AI-MAJOR-EVENT` — 악기/장르 enum 고정 목록 채택 결정(자유 문자열 대안 대비 표기 통일·추후 필터 대비)
+- `AI-MAJOR-EVENT` — 악기 enum 고정 목록 채택(표기 통일·추후 필터 대비) + **장르 필드 제외 결정**(클래식 중심 서비스, 필요 시 추후 추가)
 - TODO-READY 2건 → TODO-DONE, `AI-ACTION-LOGS`
 - 노션 TODO 보드/스케줄 동기화
