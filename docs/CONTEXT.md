@@ -16,7 +16,7 @@
 ## 주의
 
 * BE 스택: Spring Boot 3.4.5 / Gradle 8.11.1 / JDK 21(toolchain). Gradle 9는 Boot 3.4 미지원이므로 래퍼 올리지 말 것.
-* 테스트 DB는 H2(`testRuntimeOnly`)만 존재. 운영 DB(MySQL) 데이터소스 설정은 아직 없음 → 전역 구성/도메인 작업 시 `application.yaml`에 추가 필요.
+* 테스트 DB는 H2(`testRuntimeOnly`)만 존재. **런타임 데이터소스가 없어 `bootRun`(로컬 서버 기동) 자체가 불가** → MySQL 데이터소스 구성이 FE 연동·수동 검증의 선행 조건(TODO-READY 반영).
 * 도메인 문서 없이 해당 도메인 구현 금지. 현재 문서화된 도메인: COMMON, MEMBER.
 * 코드 스타일: 단순 필드 접근자는 Lombok `@Getter`로 통일(수동 getter 금지).
 * 응답 에러 본문은 `ErrorBody(resultCode:String, code:String, message)`. `resultCode`는 `HTTP상태-일련번호` 문자열(400-01/405-01/500-01).

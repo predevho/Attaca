@@ -37,13 +37,6 @@
 
 ---
 
-## 8. Lombok / 코드 스타일
-
-* 단순 필드 접근자는 손으로 작성하지 않고 Lombok `@Getter`로 생성한다. (클래스/enum 단위 부착, 필드만 유지)
-* 파생 값(예: `ErrorCode.getCode()` = `name()`)처럼 필드 접근이 아닌 메서드는 명시적으로 작성한다.
-
----
-
 ## 3. 공통 엔티티
 
 * 위치: `com.back.global.common`
@@ -108,3 +101,10 @@
   * 확장자 판별 시 점(`.`)이 파일명 맨 앞(index 0)에 오면 확장자 없음으로 취급한다(예: `.내파일`). 그렇지 않으면 `.내파일` 같은 dotfile의 원본 파일명 전체가 key로 새어나가 "원본 파일명은 key에 넣지 않는다" 규칙이 깨지고 한글이 공개 URL에 노출된다.
 * `FileService.upload(MultipartFile file, String directory, Long uploaderId)`는 빈 파일뿐 아니라 파일명이 없거나 공백인 경우도 `INVALID_FILE`로 거절한다. `uploaderId`는 nullable.
 * 허용 contentType·크기 제한 같은 정책은 각 도메인이 정한다. `FileService`는 빈 파일/파일명 없음만 거절한다.
+
+---
+
+## 8. Lombok / 코드 스타일
+
+* 단순 필드 접근자는 손으로 작성하지 않고 Lombok `@Getter`로 생성한다. (클래스/enum 단위 부착, 필드만 유지)
+* 파생 값(예: `ErrorCode.getCode()` = `name()`)처럼 필드 접근이 아닌 메서드는 명시적으로 작성한다.

@@ -39,7 +39,7 @@ com.back.domain.member
 * instruments (다룰 수 있는 악기 — 다중)
 * genres (선호 장르 — 다중)
 * bio (자기소개)
-* profileImageKey / profileImageUrl (S3 저장, FileStorage 경유)
+* profileImageKey (업로드는 `FileService` 경유. **URL은 저장하지 않는다** — `FileService.getUrl(key)`로 생성, `DOMAIN-COMMON-STATUTE §7`)
 
 ### SocialAccount (구현 완료, 2026-07-13)
 * id
@@ -54,8 +54,8 @@ com.back.domain.member
 
 ## 3. 인증 규칙
 
-* 자체 가입: email + password. 비밀번호는 해시(BCrypt 등)로 저장한다.
-* 로그인 성공 시 JWT(access, 필요 시 refresh)를 발급한다.
+* 자체 가입: `loginId + password + email + nickname`. 비밀번호는 BCrypt 해시로 저장한다. (2026-07-13, 로그인 열쇠를 email→loginId로 전환)
+* 로그인 성공 시 JWT access+refresh 쌍을 발급한다. (자체/소셜 동일)
 
 ### 3.1 확정된 API (구현 완료: 자체 가입/로그인 + 카카오 소셜, 2026-07-13)
 
@@ -98,6 +98,6 @@ com.back.domain.member
 ## 6. 테스트
 
 * 회원가입/로그인 성공·실패 케이스
-* 중복 email/nickname 검증
+* 중복 loginId/email/nickname 검증
 * 소셜 로그인 신규/기존 분기
 * 권한별 접근 제어
