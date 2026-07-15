@@ -24,7 +24,7 @@
 * [ ] RECRUITMENT: 구인/구직 공고 + 지원
 * [ ] CHAT: WebSocket(STOMP)+Redis 기반 1:1 / 1:N 채팅
 * [ ] FE: MEMBER 프로필 화면(조회/수정/이미지) — BE API·BFF 패턴 준비됨
-* [ ] FE: 카카오 소셜 로그인 연동(인가코드 리다이렉트 → BFF 교환)
+* [ ] FE: 카카오 실제 로그인 왕복 수동 검증 — 앱 키(REST API 키)·redirect_uri 등록 후. FE 코드·CSRF state는 2026-07-15 구현 완료(배선 목/로컬 검증), 실키 성공만 잔여.
 
 ## BE 공통 (도메인 확장 전후로 필요)
 
