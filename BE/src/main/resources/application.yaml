@@ -5,6 +5,14 @@ spring:
     multipart:
       max-file-size: 10MB
       max-request-size: 10MB
+  datasource:
+    url: ${DB_URL:jdbc:mysql://localhost:3306/attaca}
+    username: ${DB_USERNAME:attaca}
+    password: ${DB_PASSWORD:attaca-local}
+  jpa:
+    hibernate:
+      ddl-auto: ${DDL_AUTO:update}
+    open-in-view: false
 
 jwt:
   secret: ${JWT_SECRET:local-dev-secret-please-change-in-real-environment-0123456789}
