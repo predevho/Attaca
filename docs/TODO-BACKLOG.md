@@ -24,7 +24,7 @@
 * [ ] RECRUITMENT: 구인/구직 공고 + 지원
 * [ ] CHAT: WebSocket(STOMP)+Redis 기반 1:1 / 1:N 채팅
 * [ ] FE: MEMBER 프로필 화면(조회/수정/이미지) — BE API·BFF 패턴 준비됨
-* [ ] FE: 카카오 실제 로그인 왕복 수동 검증 — 앱 키(REST API 키)·redirect_uri 등록 후. FE 코드·CSRF state는 2026-07-15 구현 완료(배선 목/로컬 검증), 실키 성공만 잔여.
+* [x] ~~FE: 카카오 실제 로그인 왕복 수동 검증~~ — 2026-07-15 완료. 실제 카카오 앱 키/Client Secret/Redirect URI/이메일 동의로 브라우저 왕복 성공(로그인→/dashboard). 개인 개발자 비즈 앱 전환, redirect_uri는 `/config/callback`에 등록.
 
 ## BE 공통 (도메인 확장 전후로 필요)
 
