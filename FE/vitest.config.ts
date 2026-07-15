@@ -10,6 +10,9 @@ export default defineConfig({
     setupFiles: ['./vitest.setup.ts'],
   },
   resolve: {
-    alias: { '@': fileURLToPath(new URL('./', import.meta.url)) },
+    alias: {
+      '@': fileURLToPath(new URL('./', import.meta.url)),
+      'server-only': fileURLToPath(new URL('./vitest.server-only-mock.js', import.meta.url)),
+    },
   },
 });
