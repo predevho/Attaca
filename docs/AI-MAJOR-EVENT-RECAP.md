@@ -28,3 +28,6 @@
 * **2026-07-15 VERIFIED-PERFORMER 도메인 문서화**: 인증 연주자 도메인 CONSTITUTION/STATUTE 작성(코드는 후속).
   * 인증 상태를 Member boolean이 아닌 별도 엔티티로 소유. 상태 4종(PENDING/APPROVED/REJECTED/REVOKED), 재신청=새 레코드, 어드민 직접지정·철회 가능
   * 뱃지는 MEMBER ProfileResponse.verified로 파생(서비스 협력). 심사는 ROLE_ADMIN. 공개목록은 범위 밖
+* **2026-07-15 FE 카카오 소셜 로그인**: 서버 start/callback BFF 라우트 + CSRF state(httpOnly 쿠키, 단일사용).
+  * 콜백을 서버 라우트로 둬 토큰이 UI에 안 닿음. client_id는 서버 env(NEXT_PUBLIC_ 아님)
+  * 실제 카카오 왕복은 앱 키 확보 후 수동 검증(코드·배선은 완료)

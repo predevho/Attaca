@@ -88,3 +88,12 @@
 * **어드민 직접지정 허용**: 신청 절차 없이 어드민이 APPROVED 레코드 생성(statement/evidence 없음). 심사·지정은 `/api/admin/**`(ROLE_ADMIN)로만.
 * **공개 범위는 뱃지만**: 공개 인증자 목록/페이지는 이 도메인 문서 범위 밖. 실제 소비처(FEED 등) 생길 때 설계.
 * **이번 산출물은 문서만**: CONSTITUTION/STATUTE 작성까지. 코드 구현은 별도 후속 작업.
+
+---
+
+## 2026-07-15 — FE 카카오 소셜 로그인(BFF + CSRF state) 확정
+
+### 주요 의사결정
+* **완전 서버측 콜백**: 카카오 `redirect_uri`를 서버 GET 라우트(`/api/bff/oauth/kakao/callback`)로 직접 지정해, code·state·BE교환·쿠키가 전부 서버에서 처리되고 토큰이 UI에 노출되지 않게 함. 별도 콜백 페이지 컴포넌트 없음.
+* **CSRF state**: authorize 시작을 서버 라우트(`/start`)로 두고 state를 서버 생성→httpOnly 쿠키(`oauth_state`, 10분, 단일사용)→콜백에서 대조. client_id를 클라이언트에 노출하지 않는 A안 채택(기존 BFF 일관성 + state 확장 용이).
+* **미검증 범위**: 카카오 앱 키 미확보로 실제 왕복은 수동 검증 보류. 배선(302·state·BE도달)은 목/로컬로 확인. (BE 카카오 2026-07-13과 동일 전략)
