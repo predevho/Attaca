@@ -25,6 +25,7 @@ export default function DashboardPage() {
     <main className="mx-auto mt-24 max-w-sm px-4">
       <h1 className="mb-6 text-2xl font-bold">대시보드</h1>
       <p className="mb-6">{loaded ? '로그인된 상태입니다. 환영합니다!' : '확인 중...'}</p>
+      <a href="/profile" className="mr-2 rounded border px-4 py-2">내 프로필</a>
       <button onClick={onLogout} className="rounded border px-4 py-2">로그아웃</button>
     </main>
   );
