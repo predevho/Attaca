@@ -1,16 +1,25 @@
 package com.back.global.exception;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.Size;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 class GlobalExceptionHandlerTest {
@@ -58,6 +67,32 @@ class GlobalExceptionHandlerTest {
                 .andExpect(jsonPath("$.error.code").value("RESOURCE_NOT_FOUND"));
     }
 
+    @Test
+    void validationFailure_mapsTo400InvalidInput() throws Exception {
+        mockMvc.perform(post("/test/valid")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"bio\": \"여섯글자넘는값\"}"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.error.resultCode").value("400-01"))
+                .andExpect(jsonPath("$.error.code").value("INVALID_INPUT_VALUE"));
+    }
+
+    @Test
+    void malformedBody_mapsTo400InvalidInput() throws Exception {
+        mockMvc.perform(post("/test/valid")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{이건 json이 아님"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.error.resultCode").value("400-01"));
+    }
+
+    @Test
+    void missingMultipartPart_mapsTo400InvalidInput() throws Exception {
+        mockMvc.perform(multipart("/test/part"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.error.resultCode").value("400-01"));
+    }
+
     @RestController
     static class TestController {
 
@@ -74,6 +109,17 @@ class GlobalExceptionHandlerTest {
         @GetMapping("/test/no-resource")
         public void noResource() throws NoResourceFoundException {
             throw new NoResourceFoundException(HttpMethod.GET, "/test/no-resource");
+        }
+
+        @PostMapping("/test/valid")
+        public void valid(@Valid @RequestBody ValidBody body) {
+        }
+
+        @PostMapping("/test/part")
+        public void part(@RequestPart("file") MultipartFile file) {
+        }
+
+        record ValidBody(@Size(max = 5) String bio) {
         }
     }
 }

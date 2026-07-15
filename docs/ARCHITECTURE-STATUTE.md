@@ -11,7 +11,7 @@
 * 언어/런타임: Java 21
 * 프레임워크: Spring Boot 3.4.x (안정 버전 사용, 4.x는 사용하지 않는다)
 * 빌드: Gradle (Kotlin DSL, `build.gradle.kts`)
-* 데이터: Spring Data JPA + MySQL
+* 데이터: Spring Data JPA + MySQL (로컬 개발은 레포 루트 `docker-compose.yml`의 MySQL 8.4, `docker compose up -d`. 테스트는 H2 `test` 프로파일)
 * 보안: Spring Security
   * 자체 회원가입: JWT 기반 인증
   * 소셜 로그인: OAuth2 (카카오/구글 등)

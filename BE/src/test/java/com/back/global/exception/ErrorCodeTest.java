@@ -65,4 +65,11 @@ class ErrorCodeTest {
         assertThat(ErrorCode.FILE_UPLOAD_FAILED.getResultCode()).isEqualTo("500-02");
         assertThat(ErrorCode.FILE_UPLOAD_FAILED.getStatus()).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR);
     }
+
+    @Test
+    void 회원_에러코드는_지정된_resultCode와_상태를_가진다() {
+        assertThat(ErrorCode.MEMBER_NOT_FOUND.getResultCode()).isEqualTo("404-03");
+        assertThat(ErrorCode.MEMBER_NOT_FOUND.getStatus()).isEqualTo(HttpStatus.NOT_FOUND);
+        assertThat(ErrorCode.MEMBER_NOT_FOUND.getCode()).isEqualTo("MEMBER_NOT_FOUND");
+    }
 }

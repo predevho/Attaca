@@ -33,6 +33,7 @@ public enum ErrorCode {
     EMAIL_ALREADY_EXISTS("409-01", HttpStatus.CONFLICT, "이미 사용 중인 이메일입니다."),
     NICKNAME_ALREADY_EXISTS("409-02", HttpStatus.CONFLICT, "이미 사용 중인 닉네임입니다."),
     LOGIN_ID_ALREADY_EXISTS("409-03", HttpStatus.CONFLICT, "이미 사용 중인 아이디입니다."),
+    MEMBER_NOT_FOUND("404-03", HttpStatus.NOT_FOUND, "회원을 찾을 수 없습니다."),
 
     // --- OAuth(소셜) ---
     OAUTH_EMAIL_UNVERIFIED("401-08", HttpStatus.UNAUTHORIZED, "소셜 계정의 이메일이 확인되지 않았습니다."),
