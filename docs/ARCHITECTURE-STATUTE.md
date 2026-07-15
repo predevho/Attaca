@@ -20,8 +20,12 @@
 
 ### Frontend
 
-* Next.js (React)
-* 위치: `FE/`
+* Next.js 16 (App Router) / React 19 / TypeScript / Tailwind CSS v4 / Vitest. 패키지 매니저 npm.
+* 위치: `FE/`. BE와 독립 실행(`cd FE && npm run dev`, 기본 :3000).
+* **BFF 패턴**: 브라우저는 Next(same-origin)하고만 통신하고, Next 서버가 Spring을 서버 간 호출한다.
+  토큰은 httpOnly 쿠키(`access_token`/`refresh_token`)로 다루며 UI JavaScript는 토큰을 만지지 않는다.
+  * 계층: `lib/server/*`(순수 로직·쿠키·reissue) → `app/api/bff/**`(라우트 핸들러 글루) → `app/**`(UI).
+  * BE 호출 주소는 서버 env `BE_BASE_URL`(클라이언트 노출 금지). 통신은 네이티브 fetch(라이브러리 미도입).
 * 동일 BE API를 모바일 앱이 재사용할 수 있도록 API 소비 방식을 플랫폼 독립적으로 유지한다.
 
 ---

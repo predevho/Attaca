@@ -65,3 +65,14 @@
 * **장르 필드 제외**: 서비스가 당분간 클래식 중심이라 장르 구분의 실익이 없어 프로필에서 제외. 필요 시 enum 추가로 재도입(하위호환).
 * **프로필 생성 시점**: 가입 시 자동 생성하지 않고 첫 수정/업로드 때 생성(lazy upsert). GET은 미생성 시 404가 아닌 빈 기본값 응답(FE 편집 화면 친화).
 * **선행 결함 수정**: @Valid 실패·본문 파싱 실패·multipart 파트 누락이 catch-all에 걸려 500으로 응답되던 것을 400-01로 정정.
+
+---
+
+## 2026-07-15 — FE 스택 및 인증 아키텍처(BFF) 확정
+
+### 주요 의사결정
+* **FE 스택**: Next.js 16 App Router + React 19 + TypeScript + Tailwind v4 + Vitest, npm. 위치 `FE/`.
+* **BFF 패턴 채택**: 브라우저는 Next(same-origin)하고만 통신, Next 서버가 Spring을 서버 간 호출. 토큰을 httpOnly 쿠키로 다뤄 UI JavaScript가 토큰을 만지지 않게 함(XSS 시 토큰 탈취 차단). 대안(localStorage·access메모리)보다 구현이 크지만 보안 우위로 채택.
+* **CORS 미도입**: BFF라 브라우저 경로가 same-origin이고 Next→Spring은 서버 간 호출이라 CORS(브라우저 기제)가 불필요. 당초 BACKLOG의 CORS 항목을 닫고, 모바일 앱 등 직접 호출 소비처가 생기면 재도입하기로 함.
+* **통신 방식**: 네이티브 fetch만 사용. axios·React Query는 현 규모에 과함. 통신 지연 대응·대규모 상태 동기화가 필요해지면 React Query 재검토(사용자 확인).
+* **미들웨어 보호 범위**: `/dashboard`는 쿠키 '존재'만 검사(서명 검증 안 함) — FE에 JWT 시크릿을 두지 않기 위함. 실제 검증은 BE가 API 호출 때 수행하고 만료는 reissue가 처리.

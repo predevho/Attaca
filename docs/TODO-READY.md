@@ -4,4 +4,4 @@
 
 ---
 
-* [ ] FE `FE/`에 Next.js 프로젝트 초기화 — BE 연동 시 CORS 설정 필요(BACKLOG 참조)
+(없음. BACKLOG를 참고하세요.)

@@ -15,6 +15,7 @@
 ## 2. FE/BE 분리 원칙
 
 * FE와 BE는 REST API와 WebSocket으로만 통신한다.
+* 웹(Next.js)은 BFF(Backend-For-Frontend)를 통해 same-origin으로 BE와 통신한다. 브라우저가 BE를 직접 호출하지 않으므로 웹 경로에는 CORS가 필요 없다. (모바일 앱 등 BE를 직접 호출하는 소비처가 생기면 그때 CORS를 도입한다.)
 * BE는 특정 FE 플랫폼에 종속되지 않는다. 웹으로 시작하되, 동일한 API를 모바일 앱이 그대로 재사용할 수 있어야 한다.
 * BE는 화면(뷰) 로직을 갖지 않는다. 표현은 전적으로 FE의 책임이다.
 
