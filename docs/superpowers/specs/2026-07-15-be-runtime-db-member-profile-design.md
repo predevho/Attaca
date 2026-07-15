@@ -156,10 +156,12 @@ spring:
 | 목관 | FLUTE(플루트), OBOE(오보에), CLARINET(클라리넷), BASSOON(바순) |
 | 금관 | HORN(호른), TRUMPET(트럼펫), TROMBONE(트롬본), TUBA(튜바) |
 | 건반 | PIANO(피아노), ORGAN(오르간) |
-| 기타 | PERCUSSION(타악기), VOICE(보컬), COMPOSITION(작곡), CONDUCTING(지휘), ETC(그 외) |
+| 성악/보컬 | VOICE(성악), VOCAL(보컬) |
+| 기타 | PERCUSSION(타악기), COMPOSITION(작곡), CONDUCTING(지휘), ETC(그 외) |
 
 - 리뷰(2026-07-15) 반영: 밴드/대중 악기(GUITAR/BASS_GUITAR/DRUMS)는 서비스가 당분간 취급하지
-  않아 제외. `VOCAL`은 사용자 선호에 따라 **`VOICE`** 코드를 사용(가독성).
+  않아 제외. 노래는 **`VOICE`(성악)와 `VOCAL`(보컬)로 분리**한다 — 클래식 성악과 대중 보컬은
+  다른 영역이므로 하나로 뭉개지 않는다.
 
 - enum 확장은 값 추가만으로 끝난다(하위호환). 값 삭제/개명은 기존 데이터 마이그레이션이 필요하므로
   주요 결정으로 기록 후 진행.
