@@ -61,6 +61,20 @@ describe('GET /api/bff/oauth/kakao/callback', () => {
     expect(jar['oauth_state']).toBeUndefined();
   });
 
+  it('state 통과했지만 code 없음 → /login?error=oauth, BE 미호출', async () => {
+    jar['oauth_state'] = 'S';
+    const fetchMock = vi.fn();
+    vi.stubGlobal('fetch', fetchMock);
+    const { GET } = await import('@/app/api/bff/oauth/kakao/callback/route');
+
+    const res = await GET(new Request('http://localhost:3000/api/bff/oauth/kakao/callback?state=S'));
+
+    expect(locationOf(res)).toBe('/login?error=oauth');
+    expect(fetchMock).not.toHaveBeenCalled();
+    expect(jar['oauth_state']).toBeUndefined();
+    expect(jar['access_token']).toBeUndefined();
+  });
+
   it('BE 교환 실패 → /login?error=oauth', async () => {
     jar['oauth_state'] = 'S';
     vi.stubGlobal('fetch', vi.fn(async () => beJson(
