@@ -31,3 +31,6 @@
 * **2026-07-15 FE 카카오 소셜 로그인**: 서버 start/callback BFF 라우트 + CSRF state(httpOnly 쿠키, 단일사용).
   * 콜백을 서버 라우트로 둬 토큰이 UI에 안 닿음. client_id는 서버 env(NEXT_PUBLIC_ 아님)
   * 실제 카카오 왕복은 앱 키 확보 후 수동 검증(코드·배선은 완료)
+* **2026-07-16 FE 프로필 화면**: `/profile` 조회/수정 모드 + 이미지 즉시 업로드.
+  * 악기 칩 토글·자기소개, PUT 전체 교체 유지(폼이 전체를 쥠). BFF 라우트 3종 authedBeFetch 경유
+  * beFetch를 FormData면 content-type 미설정으로 고쳐 멀티파트 지원(JSON 경로 불변)
