@@ -45,4 +45,24 @@ class ErrorCodeTest {
         assertThat(ErrorCode.OAUTH_PROVIDER_ERROR.getResultCode()).isEqualTo("502-01");
         assertThat(ErrorCode.OAUTH_PROVIDER_ERROR.getStatus()).isEqualTo(HttpStatus.BAD_GATEWAY);
     }
+
+    @Test
+    void 매칭되지_않는_리소스_에러코드는_지정된_resultCode와_상태를_가진다() {
+        assertThat(ErrorCode.RESOURCE_NOT_FOUND.getResultCode()).isEqualTo("404-02");
+        assertThat(ErrorCode.RESOURCE_NOT_FOUND.getStatus()).isEqualTo(HttpStatus.NOT_FOUND);
+        assertThat(ErrorCode.RESOURCE_NOT_FOUND.getCode()).isEqualTo("RESOURCE_NOT_FOUND");
+    }
+
+    @Test
+    void 파일_에러코드는_지정된_resultCode와_상태를_가진다() {
+        assertThat(ErrorCode.INVALID_FILE.getResultCode()).isEqualTo("400-02");
+        assertThat(ErrorCode.INVALID_FILE.getStatus()).isEqualTo(HttpStatus.BAD_REQUEST);
+        assertThat(ErrorCode.INVALID_FILE.getCode()).isEqualTo("INVALID_FILE");
+
+        assertThat(ErrorCode.FILE_NOT_FOUND.getResultCode()).isEqualTo("404-01");
+        assertThat(ErrorCode.FILE_NOT_FOUND.getStatus()).isEqualTo(HttpStatus.NOT_FOUND);
+
+        assertThat(ErrorCode.FILE_UPLOAD_FAILED.getResultCode()).isEqualTo("500-02");
+        assertThat(ErrorCode.FILE_UPLOAD_FAILED.getStatus()).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR);
+    }
 }

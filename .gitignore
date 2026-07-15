@@ -9,3 +9,6 @@
 
 # VS Code
 .vscode/
+
+# 로컬 파일 저장소 (storage.type=local)
+BE/uploads/

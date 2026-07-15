@@ -8,6 +8,7 @@ import com.back.global.security.handler.JwtAccessDeniedHandler;
 import com.back.global.security.handler.JwtAuthenticationEntryPoint;
 import com.back.global.security.jwt.JwtProperties;
 import com.back.global.security.jwt.JwtProvider;
+import com.back.global.storage.StorageProperties;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -74,6 +75,14 @@ class SecurityConfigTest {
                 .andExpect(jsonPath("$.error.resultCode").value("401-03"));
     }
 
+    @Test
+    void 파일_경로는_토큰_없이_접근_가능하다() throws Exception {
+        // 실제 저장 디렉터리에 해당 파일이 없으므로 404가 정상이다.
+        // 핵심은 401(인증 요구)이 아니라는 것 — 인가 규칙에서 permit 되었는지만 검증한다.
+        mockMvc.perform(get("/files/profile/2026/07/14/abc.png"))
+                .andExpect(status().isNotFound());
+    }
+
     @TestConfiguration
     static class TestBeans {
         @Bean
@@ -86,6 +95,16 @@ class SecurityConfigTest {
         @Bean
         JwtProvider jwtProvider(JwtProperties props) {
             return new JwtProvider(props);
+        }
+
+        // LocalFileServingConfig 는 WebMvcConfigurer 구현체라 @WebMvcTest 슬라이스가
+        // 자동으로 감지해 빈으로 만든다. 그 생성자가 요구하는 StorageProperties 를
+        // 여기서 제공하지 않으면 컨텍스트 로딩 자체가 실패한다(존재하지 않는 경로라도 무방).
+        @Bean
+        StorageProperties storageProperties() {
+            return new StorageProperties("local",
+                    new StorageProperties.Local("build/test-files", "http://localhost:8080/files"),
+                    null);
         }
     }
 

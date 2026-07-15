@@ -99,5 +99,12 @@
 
 ## 7. 파일 업로드
 
-* 파일 업로드가 필요한 도메인은 `com.back.global.storage.FileStorage`를 통해 저장한다.
-* 저장 후 얻은 논리 key와 접근 URL을 도메인 엔티티에 보관한다.
+* 파일 업로드가 필요한 도메인은 `com.back.global.storage.FileService`를 통해 저장한다.
+  `FileStorage`(바이트 저장소)를 직접 호출하지 않는다.
+* `FileStorage`는 DB를 모른다. key 생성과 메타데이터 영속화는 `FileService`의 책임이다.
+* 모든 업로드는 공용 `FileMetadata` 엔티티(`storageKey`/`originalName`/`contentType`/`size`/`uploaderId`)에 기록한다.
+* 도메인 엔티티는 `storageKey`를 보관한다. 접근 URL은 `FileService.getUrl(key)`로 만든다(저장하지 않는다).
+* key 형식: `{디렉터리}/{yyyy}/{MM}/{dd}/{UUID}.{확장자}`. 원본 파일명은 key에 넣지 않는다.
+  * 확장자 판별 시 점(`.`)이 파일명 맨 앞(index 0)에 오면 확장자 없음으로 취급한다(예: `.내파일`). 그렇지 않으면 `.내파일` 같은 dotfile의 원본 파일명 전체가 key로 새어나가 "원본 파일명은 key에 넣지 않는다" 규칙이 깨지고 한글이 공개 URL에 노출된다.
+* `FileService.upload(MultipartFile file, String directory, Long uploaderId)`는 빈 파일뿐 아니라 파일명이 없거나 공백인 경우도 `INVALID_FILE`로 거절한다. `uploaderId`는 nullable.
+* 허용 contentType·크기 제한 같은 정책은 각 도메인이 정한다. `FileService`는 빈 파일/파일명 없음만 거절한다.

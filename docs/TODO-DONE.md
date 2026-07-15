@@ -4,6 +4,18 @@
 
 ---
 
+* [x] (2026-07-14) 파일 저장 기반(FileStorage) 구성 (TDD)
+  * `global.storage`: `FileStorage`(인터페이스) / `LocalFileStorage`(기본) / `S3FileStorage`(AWS SDK v2) / `StorageProperties`
+  * `FileService.upload(MultipartFile, String directory, Long uploaderId)` — key 생성(`{디렉터리}/{yyyy}/{MM}/{dd}/{UUID}.{확장자}`) + 저장 + `FileMetadata` 영속화를 한 트랜잭션으로 조합
+  * `FileStorage`는 DB를 모른다(책임 분리). 도메인은 `FileService`만 사용
+  * 접근 URL = `base-url + key` → CloudFront/R2 전환 시 설정 한 줄만 교체
+  * 에러코드 4종 추가: `INVALID_FILE`(400-02), `FILE_NOT_FOUND`(404-01), `FILE_UPLOAD_FAILED`(500-02), `RESOURCE_NOT_FOUND`(404-02, 파일 전용 아닌 일반 코드). `BusinessException`에 cause 보존 생성자 추가
+  * `SecurityConfig`에 `/files/**` permit 추가(로컬 파일 서빙)
+  * 문서 충돌 해소: 메타데이터는 공용 `FileMetadata` 테이블로 결정 → `DOMAIN-COMMON-STATUTE §7` 개정
+  * 리뷰 중 발견·수정한 버그 2건:
+    1. 앱 전역 500→404 라우팅 버그 — 매칭되는 핸들러가 없는 모든 URL에서 Spring이 던지는 `NoResourceFoundException`이 `GlobalExceptionHandler`의 catch-all(`Exception.class`)에 걸려 500으로 응답되고 있었음. `RESOURCE_NOT_FOUND`(404-02) 전용 핸들러를 추가해 404로 정정(파일 저장 기능과 무관한 앱 전역 수정).
+    2. key 생성의 확장자 파서가 dotfile(예: `.내파일`, 점이 index 0)에서 원본 파일명 전체를 key로 흘려보내던 버그 — "원본 파일명은 key에 넣지 않는다" 규칙을 깨고 한글이 공개 URL에 노출될 수 있었음. 점이 index 0이면 확장자 없음으로 처리하도록 수정.
+  * 범위 밖: HTTP 업로드 엔드포인트(사용처인 MEMBER 프로필 이미지에서 구현), 실제 S3 연동 검증(자격증명 미발급), Presigned URL
 * [x] (2026-07-13) MEMBER: 카카오 소셜 로그인 + 자체 로그인 loginId 전환 (TDD, subagent-driven)
   * 식별자 역할 분리: `loginId`(자체 로그인, unique·nullable) / `email`(인증·소셜연결 키, 전원 필수) / `nickname`(활동명) / 내부 신원 `id`
   * 자체 auth를 email→loginId 기반으로 개정(`SignupRequest{loginId,password,email,nickname}`, `login{loginId,password}`)

@@ -6,10 +6,12 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.http.HttpMethod;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 class GlobalExceptionHandlerTest {
 
@@ -44,6 +46,18 @@ class GlobalExceptionHandlerTest {
                 .andExpect(jsonPath("$.error.code").value("INTERNAL_SERVER_ERROR"));
     }
 
+    @Test
+    void noResourceFoundException_mapsToResourceNotFound_notFileNotFound() throws Exception {
+        // /files/** 가 아닌, 매칭되는 핸들러가 없는 일반 라우팅 경로를 검증한다.
+        // 파일 저장소 예외(FILE_NOT_FOUND, 404-01)가 아닌 일반 리소스 미발견(RESOURCE_NOT_FOUND, 404-02)이어야 한다.
+        mockMvc.perform(get("/test/no-resource"))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.success").value(false))
+                .andExpect(jsonPath("$.data").isEmpty())
+                .andExpect(jsonPath("$.error.resultCode").value("404-02"))
+                .andExpect(jsonPath("$.error.code").value("RESOURCE_NOT_FOUND"));
+    }
+
     @RestController
     static class TestController {
 
@@ -55,6 +69,11 @@ class GlobalExceptionHandlerTest {
         @GetMapping("/test/boom")
         public void boom() {
             throw new RuntimeException("unexpected");
+        }
+
+        @GetMapping("/test/no-resource")
+        public void noResource() throws NoResourceFoundException {
+            throw new NoResourceFoundException(HttpMethod.GET, "/test/no-resource");
         }
     }
 }

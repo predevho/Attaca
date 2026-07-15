@@ -17,6 +17,7 @@ public enum ErrorCode {
     INTERNAL_SERVER_ERROR("500-01", HttpStatus.INTERNAL_SERVER_ERROR, "서버 내부 오류가 발생했습니다."),
     INVALID_INPUT_VALUE("400-01", HttpStatus.BAD_REQUEST, "입력값이 올바르지 않습니다."),
     METHOD_NOT_ALLOWED("405-01", HttpStatus.METHOD_NOT_ALLOWED, "지원하지 않는 HTTP 메서드입니다."),
+    RESOURCE_NOT_FOUND("404-02", HttpStatus.NOT_FOUND, "요청한 리소스를 찾을 수 없습니다."),
 
     // --- 인증/인가 ---
     UNAUTHORIZED("401-01", HttpStatus.UNAUTHORIZED, "인증이 필요합니다."),
@@ -35,7 +36,12 @@ public enum ErrorCode {
 
     // --- OAuth(소셜) ---
     OAUTH_EMAIL_UNVERIFIED("401-08", HttpStatus.UNAUTHORIZED, "소셜 계정의 이메일이 확인되지 않았습니다."),
-    OAUTH_PROVIDER_ERROR("502-01", HttpStatus.BAD_GATEWAY, "소셜 로그인 제공자 연동에 실패했습니다.");
+    OAUTH_PROVIDER_ERROR("502-01", HttpStatus.BAD_GATEWAY, "소셜 로그인 제공자 연동에 실패했습니다."),
+
+    // --- 파일 저장 ---
+    INVALID_FILE("400-02", HttpStatus.BAD_REQUEST, "올바르지 않은 파일입니다."),
+    FILE_NOT_FOUND("404-01", HttpStatus.NOT_FOUND, "파일을 찾을 수 없습니다."),
+    FILE_UPLOAD_FAILED("500-02", HttpStatus.INTERNAL_SERVER_ERROR, "파일 업로드에 실패했습니다.");
 
     private final String resultCode;
     private final HttpStatus status;
