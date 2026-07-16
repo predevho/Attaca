@@ -3,6 +3,7 @@ package com.back.domain.feed.repository;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.back.domain.feed.entity.Comment;
+import com.back.domain.feed.entity.CommentLike;
 import com.back.domain.feed.entity.Post;
 import com.back.domain.feed.entity.PostLike;
 import java.util.List;
@@ -19,6 +20,7 @@ class FeedRepositoryTest {
     @Autowired PostRepository postRepository;
     @Autowired CommentRepository commentRepository;
     @Autowired PostLikeRepository postLikeRepository;
+    @Autowired CommentLikeRepository commentLikeRepository;
 
     @Test
     void 타임라인은_미삭제글을_id_내림차순_커서로_가져온다() {
@@ -74,5 +76,40 @@ class FeedRepositoryTest {
 
         List<Long> liked = postLikeRepository.findLikedPostIds(1L, List.of(10L, 11L));
         assertThat(liked).containsExactly(10L);
+    }
+
+    @Test
+    void 좋아요_수를_댓글별로_배치_집계한다() {
+        commentLikeRepository.save(CommentLike.create(1L, 20L));
+        commentLikeRepository.save(CommentLike.create(2L, 20L));
+        commentLikeRepository.save(CommentLike.create(1L, 21L));
+
+        Map<Long, Long> counts = commentLikeRepository.countByCommentIds(List.of(20L, 21L)).stream()
+                .collect(Collectors.toMap(IdCount::getId, IdCount::getCount));
+
+        assertThat(counts).containsEntry(20L, 2L).containsEntry(21L, 1L);
+    }
+
+    @Test
+    void 내가_좋아요한_댓글_id를_배치로_가져온다() {
+        commentLikeRepository.save(CommentLike.create(1L, 20L));
+        commentLikeRepository.save(CommentLike.create(2L, 21L));
+
+        List<Long> liked = commentLikeRepository.findLikedCommentIds(1L, List.of(20L, 21L));
+        assertThat(liked).containsExactly(20L);
+    }
+
+    @Test
+    void 댓글_커서는_다음_페이지를_오래된순으로_이어서_가져온다() {
+        Comment c1 = commentRepository.save(Comment.create(10L, 1L, "a"));
+        Comment c2 = commentRepository.save(Comment.create(10L, 1L, "b"));
+        Comment c3 = commentRepository.save(Comment.create(10L, 1L, "c"));
+
+        List<Comment> firstPage = commentRepository.findCommentPage(10L, null, PageRequest.of(0, 2));
+        assertThat(firstPage).extracting(Comment::getId).containsExactly(c1.getId(), c2.getId());
+
+        List<Comment> secondPage =
+                commentRepository.findCommentPage(10L, c2.getId(), PageRequest.of(0, 2));
+        assertThat(secondPage).extracting(Comment::getId).containsExactly(c3.getId());
     }
 }
