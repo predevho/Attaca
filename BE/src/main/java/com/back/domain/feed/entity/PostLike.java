@@ -15,7 +15,7 @@ import lombok.NoArgsConstructor;
 /** 게시글 좋아요. 회원당 게시글당 최대 1(유니크). 취소는 물리 삭제. */
 @Entity
 @Table(name = "feed_post_like",
-        uniqueConstraints = @UniqueConstraint(columnNames = {"memberId", "postId"}))
+        uniqueConstraints = @UniqueConstraint(columnNames = {"member_id", "post_id"}))
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class PostLike extends BaseEntity {
