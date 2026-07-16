@@ -7,11 +7,13 @@ export type BeResult = { ok: boolean; status: number; data: unknown; message: st
 
 /** Spring BE를 호출하고 ApiResponse를 {ok,status,data,message}로 정규화한다. 쿠키/next 헤더를 모른다(순수 fetch). */
 export async function beFetch(path: string, init?: RequestInit): Promise<BeResult> {
+  const isForm = init?.body instanceof FormData;
+  const baseHeaders: Record<string, string> = isForm ? {} : { 'content-type': 'application/json' };
   let res: Response;
   try {
     res = await fetch(BE_BASE_URL + path, {
       ...init,
-      headers: { 'content-type': 'application/json', ...(init?.headers ?? {}) },
+      headers: { ...baseHeaders, ...(init?.headers ?? {}) },
     });
   } catch {
     return { ok: false, status: 0, data: null, message: '서버에 연결할 수 없습니다.' };

@@ -23,8 +23,12 @@
 * [ ] PERFORMANCE: 연주회 등록·홍보, 피드 카드 노출 연동
 * [ ] RECRUITMENT: 구인/구직 공고 + 지원
 * [ ] CHAT: WebSocket(STOMP)+Redis 기반 1:1 / 1:N 채팅
-* [ ] FE: MEMBER 프로필 화면(조회/수정/이미지) — BE API·BFF 패턴 준비됨
+* [x] ~~FE: MEMBER 프로필 화면(조회/수정/이미지)~~ — 2026-07-16 완료(조회/수정 모드, 이미지 즉시 업로드, beFetch 멀티파트 지원). 실이미지 S3 검증만 별개 BACKLOG.
 * [x] ~~FE: 카카오 실제 로그인 왕복 수동 검증~~ — 2026-07-15 완료. 실제 카카오 앱 키/Client Secret/Redirect URI/이메일 동의로 브라우저 왕복 성공(로그인→/dashboard). 개인 개발자 비즈 앱 전환, redirect_uri는 `/config/callback`에 등록.
+
+## FE 공통 (정리)
+
+* [ ] FE: BFF 라우트 status 폴백 일괄 수정 — 모든 BFF 라우트가 `{ status: res.status || 200 }`을 써서 BE 연결 실패(`beFetch` status 0)를 HTTP 200으로 응답한다. 현재 클라이언트는 바디의 `ok`로 판단해 무해하나, status 기준 소비처가 생기면 오작동. `res.status || 502`(또는 `=== 0 ? 502`)로 login/signup/logout/me/oauth·프로필 등 전체를 한 번에 정리. (2026-07-16 프로필 리뷰에서 식별)
 
 ## BE 공통 (도메인 확장 전후로 필요)
 

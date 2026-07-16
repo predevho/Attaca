@@ -22,3 +22,18 @@ export async function getBff<T = unknown>(path: string): Promise<BffResult<T>> {
   const res = await fetch(path, { method: 'GET' });
   return parse<T>(res);
 }
+
+export async function putBff<T = unknown>(path: string, body?: unknown): Promise<BffResult<T>> {
+  const res = await fetch(path, {
+    method: 'PUT',
+    headers: { 'content-type': 'application/json' },
+    body: body === undefined ? undefined : JSON.stringify(body),
+  });
+  return parse<T>(res);
+}
+
+/** multipart PUT. content-type을 지정하지 않아 브라우저가 boundary를 설정한다. */
+export async function putBffForm<T = unknown>(path: string, form: FormData): Promise<BffResult<T>> {
+  const res = await fetch(path, { method: 'PUT', body: form });
+  return parse<T>(res);
+}

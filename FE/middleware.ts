@@ -5,7 +5,7 @@ import { NextResponse, type NextRequest } from 'next/server';
 const ACCESS_COOKIE = 'access_token';
 
 /**
- * /dashboard 보호. access 쿠키의 '존재'만 검사한다(서명 검증은 BE가 실제 호출 시 수행).
+ * /dashboard, /profile 보호. access 쿠키의 '존재'만 검사한다(서명 검증은 BE가 실제 호출 시 수행).
  * 만료된 access여도 통과시키고, 데이터 호출 단계에서 reissue가 처리한다 —
  * FE에 JWT 시크릿을 두지 않기 위함.
  */
@@ -18,4 +18,4 @@ export function middleware(req: NextRequest) {
   return NextResponse.next();
 }
 
-export const config = { matcher: ['/dashboard/:path*'] };
+export const config = { matcher: ['/dashboard/:path*', '/profile/:path*'] };
