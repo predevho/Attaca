@@ -198,4 +198,23 @@ class VerifiedPerformerServiceTest {
         assertThat(pending).hasSize(2);
         assertThat(pending).allMatch(a -> a.status() == VerificationStatus.PENDING);
     }
+
+    // --- 배치 조회 ---
+
+    @Test
+    void 승인된_회원_id만_배치로_돌려준다() {
+        ApplicationResponse pending = service.apply(1L, applyRequest());
+        service.approve(pending.id(), ADMIN, "승인");     // 1L 승인
+        service.apply(2L, applyRequest());                // 2L 은 PENDING
+
+        java.util.Set<Long> verified =
+                service.findVerifiedMemberIds(java.util.Set.of(1L, 2L, 3L));
+
+        assertThat(verified).containsExactly(1L);
+    }
+
+    @Test
+    void 빈_입력은_빈_집합을_돌려준다() {
+        assertThat(service.findVerifiedMemberIds(java.util.Set.of())).isEmpty();
+    }
 }

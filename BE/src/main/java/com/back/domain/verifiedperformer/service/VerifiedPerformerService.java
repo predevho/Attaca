@@ -8,6 +8,7 @@ import com.back.domain.verifiedperformer.entity.VerificationStatus;
 import com.back.domain.verifiedperformer.repository.VerificationApplicationRepository;
 import com.back.global.exception.BusinessException;
 import com.back.global.exception.ErrorCode;
+import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -86,6 +87,15 @@ public class VerifiedPerformerService {
     @Transactional(readOnly = true)
     public boolean isVerified(Long memberId) {
         return repository.existsByMemberIdAndStatus(memberId, VerificationStatus.APPROVED);
+    }
+
+    /** 주어진 회원들 중 인증(APPROVED) 상태인 회원 id 집합. 피드 등 목록 뱃지 파생의 N+1 방지용. */
+    @Transactional(readOnly = true)
+    public Set<Long> findVerifiedMemberIds(Set<Long> memberIds) {
+        if (memberIds == null || memberIds.isEmpty()) {
+            return Set.of();
+        }
+        return Set.copyOf(repository.findApprovedMemberIds(memberIds));
     }
 
     private void rejectIfActiveApplicationExists(Long memberId) {

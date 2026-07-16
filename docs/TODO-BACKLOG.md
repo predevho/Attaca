@@ -19,8 +19,8 @@
 * [x] ~~VERIFIED-PERFORMER: 인증 연주자 신청 → 어드민 승인/거절/철회, 뱃지~~ — 2026-07-16 BE 구현 완료(TDD). 엔티티/상태머신 + 회원 API 2종 + 어드민 API 5종 + `isVerified` 협력 + MEMBER `ProfileResponse.verified` 통합. 에러코드 409-04~06/404-04 추가.
   * 확정한 결정: `memberId`=원시 Long, `GET .../applications/me` 이력없음=200+data:null, 어드민 목록=`?status`+Pageable(createdAt desc, id 타이브레이크), 뱃지는 프로필 미생성 회원도 파생.
   * 남은 범위 밖: 공개 인증자 목록/신청 첨부파일/이력 테이블, 어드민 grant 시 회원 존재 검증(느슨한 결합 유지로 미도입), 실FE 화면.
-* [ ] FEED: 게시글/댓글/좋아요, 피드 타임라인 (BE 구현 — 문서는 2026-07-17 완료)
-  * 설계 확정(2026-07-17, DOMAIN-FEED-*): 엔티티 4종(Post/Comment/PostLike/CommentLike), 게시글+좋아요(게시글·댓글)+평면 댓글, soft delete, 커서 페이징(타임라인 최신순/댓글 오래된순). 작성자 표시(닉네임+인증뱃지)는 MEMBER 배치 조회 협력으로 파생(fetch join 불가 — 도메인 경계상 연관 없음). 에러코드 404-05/06. 이미지첨부·대댓글·댓글수정·팔로우타임라인은 범위 밖.
+* [x] ~~FEED: 게시글/댓글/좋아요, 피드 타임라인~~ — 2026-07-17 BE 구현 완료(TDD, 서브에이전트 주도). 엔티티 4종 + 리포지토리(커서/배치) + 서비스 3종 + 컨트롤러 3종 + MEMBER 배치 협력(MemberQueryService). 에러코드 404-05/06. 전 계층 테스트 + 전체 회귀 통과, 최종 전체-브랜치 리뷰 MERGEABLE.
+  * 남은 범위 밖: 이미지첨부·대댓글·댓글수정·팔로우타임라인·신고·PERFORMANCE 카드.
 * [ ] PERFORMANCE: 연주회 등록·홍보, 피드 카드 노출 연동
 * [ ] RECRUITMENT: 구인/구직 공고 + 지원
 * [ ] CHAT: WebSocket(STOMP)+Redis 기반 1:1 / 1:N 채팅
@@ -30,6 +30,11 @@
 ## FE 공통 (정리)
 
 * [ ] FE: BFF 라우트 status 폴백 일괄 수정 — 모든 BFF 라우트가 `{ status: res.status || 200 }`을 써서 BE 연결 실패(`beFetch` status 0)를 HTTP 200으로 응답한다. 현재 클라이언트는 바디의 `ok`로 판단해 무해하나, status 기준 소비처가 생기면 오작동. `res.status || 502`(또는 `=== 0 ? 502`)로 login/signup/logout/me/oauth·프로필 등 전체를 한 번에 정리. (2026-07-16 프로필 리뷰에서 식별)
+
+## FEED 정리 (최종 리뷰에서 이연된 Minor)
+
+* [ ] FEED: `clamp(size)`가 `FeedPostController`/`FeedCommentController`에 중복 — 공용 헬퍼로 추출(예: `FeedPostController.isAdmin`처럼 정적 헬퍼 재사용). (2026-07-17 최종 리뷰 식별)
+* [ ] FEED: `VerificationApplicationRepository.findApprovedMemberIds`의 JPQL이 enum을 FQN 리터럴로 사용 → `@Param`으로 파라미터 바인딩 정리(리네임 취약). 해당 테스트의 인라인 `java.util.Set`도 import로. (2026-07-17)
 
 ## BE 공통 (도메인 확장 전후로 필요)
 

@@ -48,7 +48,11 @@ public enum ErrorCode {
     // --- 파일 저장 ---
     INVALID_FILE("400-02", HttpStatus.BAD_REQUEST, "올바르지 않은 파일입니다."),
     FILE_NOT_FOUND("404-01", HttpStatus.NOT_FOUND, "파일을 찾을 수 없습니다."),
-    FILE_UPLOAD_FAILED("500-02", HttpStatus.INTERNAL_SERVER_ERROR, "파일 업로드에 실패했습니다.");
+    FILE_UPLOAD_FAILED("500-02", HttpStatus.INTERNAL_SERVER_ERROR, "파일 업로드에 실패했습니다."),
+
+    // --- FEED ---
+    POST_NOT_FOUND("404-05", HttpStatus.NOT_FOUND, "게시글을 찾을 수 없습니다."),
+    COMMENT_NOT_FOUND("404-06", HttpStatus.NOT_FOUND, "댓글을 찾을 수 없습니다.");
 
     private final String resultCode;
     private final HttpStatus status;
