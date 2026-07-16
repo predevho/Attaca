@@ -7,7 +7,7 @@
 ## 도메인 문서화 (구현 전 필수)
 
 * [x] ~~DOMAIN-VERIFIED-PERFORMER-CONSTITUTION.md / STATUTE.md~~ (2026-07-15 작성 완료)
-* [ ] DOMAIN-FEED-CONSTITUTION.md / STATUTE.md
+* [x] ~~DOMAIN-FEED-CONSTITUTION.md / STATUTE.md~~ (2026-07-17 작성 완료)
 * [ ] DOMAIN-PERFORMANCE-CONSTITUTION.md / STATUTE.md
 * [ ] DOMAIN-RECRUITMENT-CONSTITUTION.md / STATUTE.md
 * [ ] DOMAIN-CHAT-CONSTITUTION.md / STATUTE.md
@@ -19,7 +19,8 @@
 * [x] ~~VERIFIED-PERFORMER: 인증 연주자 신청 → 어드민 승인/거절/철회, 뱃지~~ — 2026-07-16 BE 구현 완료(TDD). 엔티티/상태머신 + 회원 API 2종 + 어드민 API 5종 + `isVerified` 협력 + MEMBER `ProfileResponse.verified` 통합. 에러코드 409-04~06/404-04 추가.
   * 확정한 결정: `memberId`=원시 Long, `GET .../applications/me` 이력없음=200+data:null, 어드민 목록=`?status`+Pageable(createdAt desc, id 타이브레이크), 뱃지는 프로필 미생성 회원도 파생.
   * 남은 범위 밖: 공개 인증자 목록/신청 첨부파일/이력 테이블, 어드민 grant 시 회원 존재 검증(느슨한 결합 유지로 미도입), 실FE 화면.
-* [ ] FEED: 게시글/댓글/좋아요, 피드 타임라인
+* [ ] FEED: 게시글/댓글/좋아요, 피드 타임라인 (BE 구현 — 문서는 2026-07-17 완료)
+  * 설계 확정(2026-07-17, DOMAIN-FEED-*): 엔티티 4종(Post/Comment/PostLike/CommentLike), 게시글+좋아요(게시글·댓글)+평면 댓글, soft delete, 커서 페이징(타임라인 최신순/댓글 오래된순). 작성자 표시(닉네임+인증뱃지)는 MEMBER 배치 조회 협력으로 파생(fetch join 불가 — 도메인 경계상 연관 없음). 에러코드 404-05/06. 이미지첨부·대댓글·댓글수정·팔로우타임라인은 범위 밖.
 * [ ] PERFORMANCE: 연주회 등록·홍보, 피드 카드 노출 연동
 * [ ] RECRUITMENT: 구인/구직 공고 + 지원
 * [ ] CHAT: WebSocket(STOMP)+Redis 기반 1:1 / 1:N 채팅
