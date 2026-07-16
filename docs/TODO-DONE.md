@@ -4,6 +4,15 @@
 
 ---
 
+* [x] (2026-07-16) VERIFIED-PERFORMER(인증 연주자) BE 도메인 구현 (TDD)
+  * 상태 머신 엔티티 `VerificationApplication`(PENDING/APPROVED/REJECTED/REVOKED) — `apply`/`grantByAdmin` 팩토리 + `approve`/`reject`/`revoke` 전이(종결 상태 재처리 시 `INVALID_APPLICATION_STATE`). `memberId`는 원시 Long(느슨한 결합), 재신청=새 레코드로 이력 보존
+  * 리포지토리: `existsByMemberIdAndStatus`(활성 유일성·뱃지 판정), `findTop...OrderByCreatedAtDescIdDesc`(최신 신청 — createdAt 동률을 id로 타이브레이크해 결정적 정렬), `findByStatus...`(어드민 페이징)
+  * 서비스 `VerifiedPerformerService`: 신청(활성 PENDING→409-04/APPROVED→409-05 거절), 승인/거절/철회, 어드민 직접지정, `isVerified`(APPROVED만 true)
+  * 회원 API 2종: `POST /api/verified-performers/applications`, `GET /api/verified-performers/applications/me`(이력 없으면 200+data:null)
+  * 어드민 API 5종(`/api/admin/**`, ROLE_ADMIN): 상태별 목록(`?status`+Pageable), `{id}/approve`(사유 선택)·`{id}/reject`·`{id}/revoke`(사유 필수), `grant`(직접지정)
+  * 전역 `ErrorCode` 4종 추가: `VERIFICATION_ALREADY_PENDING`(409-04)/`VERIFICATION_ALREADY_APPROVED`(409-05)/`INVALID_APPLICATION_STATE`(409-06)/`APPLICATION_NOT_FOUND`(404-04)
+  * MEMBER 통합: `ProfileResponse.verified` 추가, `MemberProfileService`가 `VerifiedPerformerService.isVerified`로 뱃지 파생(프로필 미생성 회원도 파생). 도메인 경계는 서비스 계층 협력만(엔티티 직접 참조 없음)
+  * 엔티티/리포지토리/서비스/컨트롤러(회원·어드민) 전 계층 테스트, 전체 `test` 통과
 * [x] (2026-07-15) FE Next.js 초기화 + 인증 플로우(BFF) (TDD, subagent-driven)
   * Next 16(App Router)/React 19/TS/Tailwind/Vitest 스캐폴딩, 위치 `FE/`
   * BFF 3계층: `lib/server/*`(beClient·cookies·session) / `app/api/bff/**`(signup·login·logout·me) / UI. 토큰은 httpOnly 쿠키, UI 미접근

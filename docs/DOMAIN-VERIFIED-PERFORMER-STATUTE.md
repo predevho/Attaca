@@ -123,9 +123,11 @@ com.back.domain.verifiedperformer
 
 ---
 
-## 7. 구현 착수 시 확정할 것
+## 7. 구현 착수 시 확정한 결정 (2026-07-16 BE 구현)
 
-* `memberId` 원시 Long vs `Member` 연관.
-* `GET .../applications/me`의 이력 없음 응답 형태(빈 객체 vs 404 vs null 필드).
-* 어드민 목록 페이징·정렬 기준.
-* MEMBER `ProfileResponse`에 `verified` 필드 추가(MEMBER 도메인 변경 동반).
+* `memberId` : **원시 Long**으로 확정(도메인 간 느슨한 결합). `Member` 연관 미사용.
+* `GET .../applications/me` 이력 없음 : **HTTP 200 + `data: null`**(404 아님 — 프로필 조회의 빈 기본값 정책과 결).
+* 어드민 목록 : `?status=PENDING`(기본) + Spring `Pageable`. 정렬은 `createdAt DESC, id DESC`. **id 타이브레이크**는 동시 저장(같은 순간 `createdAt`)에도 "최신"/페이지 순서가 결정적이도록 하기 위함.
+* MEMBER `ProfileResponse.verified` : 추가 완료. `MemberProfileService`가 `VerifiedPerformerService.isVerified`를 호출해 채운다. 프로필 미생성 회원도 뱃지는 파생된다(어드민 직접지정 대비).
+* 어드민 `grant` 시 회원 존재 검증 : **미도입**(느슨한 결합 유지). 필요 시 서비스 계층에서 MEMBER 협력으로 추후 추가.
+* 요청 DTO : 신청 `ApplyRequest{statement(필수), evidenceUrls(≤10)}`, 거절/철회 `DecisionReasonRequest{reason(필수)}`, 승인 `DecisionRequest{reason?}`(본문 생략 가능), 직접지정 `GrantRequest{memberId(필수), reason?}`.
