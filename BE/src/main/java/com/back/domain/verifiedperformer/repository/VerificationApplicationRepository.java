@@ -2,10 +2,14 @@ package com.back.domain.verifiedperformer.repository;
 
 import com.back.domain.verifiedperformer.entity.VerificationApplication;
 import com.back.domain.verifiedperformer.entity.VerificationStatus;
+import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 public interface VerificationApplicationRepository
         extends JpaRepository<VerificationApplication, Long> {
@@ -22,4 +26,11 @@ public interface VerificationApplicationRepository
     /** 어드민 상태별 신청 목록(페이징). 안정적 페이지네이션을 위해 id 로 타이브레이크한다. */
     Page<VerificationApplication> findByStatusOrderByCreatedAtDescIdDesc(VerificationStatus status,
             Pageable pageable);
+
+    /** 주어진 회원 id 중 APPROVED 레코드가 있는 회원 id만 배치로 조회한다. 피드 등 목록 뱃지 파생의 N+1 방지용. */
+    @Query(
+            "select distinct a.memberId from VerificationApplication a "
+            + "where a.status = com.back.domain.verifiedperformer.entity.VerificationStatus.APPROVED "
+            + "and a.memberId in :ids")
+    List<Long> findApprovedMemberIds(@Param("ids") Collection<Long> ids);
 }
