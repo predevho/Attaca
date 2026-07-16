@@ -9,6 +9,7 @@ import com.back.domain.feed.repository.PostRepository;
 import com.back.global.exception.BusinessException;
 import com.back.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -25,8 +26,13 @@ public class FeedLikeService {
     @Transactional
     public void likePost(Long memberId, Long postId) {
         requireActivePost(postId);
-        if (!postLikeRepository.existsByMemberIdAndPostId(memberId, postId)) {
-            postLikeRepository.save(PostLike.create(memberId, postId));
+        if (postLikeRepository.existsByMemberIdAndPostId(memberId, postId)) {
+            return; // 이미 좋아요 상태 — no-op
+        }
+        try {
+            postLikeRepository.saveAndFlush(PostLike.create(memberId, postId));
+        } catch (DataIntegrityViolationException e) {
+            // 동시 중복 요청 — 유니크 제약이 최종 방어선, 멱등하게 무시
         }
     }
 
@@ -38,8 +44,13 @@ public class FeedLikeService {
     @Transactional
     public void likeComment(Long memberId, Long commentId) {
         requireActiveComment(commentId);
-        if (!commentLikeRepository.existsByMemberIdAndCommentId(memberId, commentId)) {
-            commentLikeRepository.save(CommentLike.create(memberId, commentId));
+        if (commentLikeRepository.existsByMemberIdAndCommentId(memberId, commentId)) {
+            return; // 이미 좋아요 상태 — no-op
+        }
+        try {
+            commentLikeRepository.saveAndFlush(CommentLike.create(memberId, commentId));
+        } catch (DataIntegrityViolationException e) {
+            // 동시 중복 요청 — 유니크 제약이 최종 방어선, 멱등하게 무시
         }
     }
 
