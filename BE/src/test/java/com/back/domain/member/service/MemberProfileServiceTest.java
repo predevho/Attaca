@@ -10,6 +10,8 @@ import com.back.domain.member.entity.Instrument;
 import com.back.domain.member.entity.Member;
 import com.back.domain.member.repository.MemberProfileRepository;
 import com.back.domain.member.repository.MemberRepository;
+import com.back.domain.verifiedperformer.repository.VerificationApplicationRepository;
+import com.back.domain.verifiedperformer.service.VerifiedPerformerService;
 import com.back.global.exception.BusinessException;
 import com.back.global.exception.ErrorCode;
 import com.back.global.storage.FileMetadataRepository;
@@ -36,15 +38,20 @@ class MemberProfileServiceTest {
     private MemberProfileRepository memberProfileRepository;
     @Autowired
     private FileMetadataRepository fileMetadataRepository;
+    @Autowired
+    private VerificationApplicationRepository verificationApplicationRepository;
 
     private FakeFileStorage fileStorage;
+    private VerifiedPerformerService verifiedPerformerService;
     private MemberProfileService service;
 
     @BeforeEach
     void setUp() {
         fileStorage = new FakeFileStorage();
         FileService fileService = new FileService(fileStorage, fileMetadataRepository);
-        service = new MemberProfileService(memberRepository, memberProfileRepository, fileService);
+        verifiedPerformerService = new VerifiedPerformerService(verificationApplicationRepository);
+        service = new MemberProfileService(memberRepository, memberProfileRepository, fileService,
+                verifiedPerformerService);
     }
 
     private Member savedMember(String suffix) {
@@ -141,6 +148,51 @@ class MemberProfileServiceTest {
         assertThat(newKey).isNotEqualTo(oldKey);
         assertThat(fileStorage.stored).doesNotContainKey(oldKey).containsKey(newKey);
         assertThat(fileMetadataRepository.findByStorageKey(oldKey)).isEmpty();
+    }
+
+    @Test
+    void 인증되지_않은_회원의_프로필은_verified가_false다() {
+        Member member = savedMember("v1");
+
+        ProfileResponse response = service.getMyProfile(member.getId());
+
+        assertThat(response.verified()).isFalse();
+    }
+
+    @Test
+    void 인증_승인된_회원의_프로필은_verified가_true다() {
+        Member member = savedMember("v2");
+        verifiedPerformerService.grant(
+                new com.back.domain.verifiedperformer.dto.GrantRequest(member.getId(), "직접지정"), 99L);
+
+        ProfileResponse response = service.getMyProfile(member.getId());
+
+        assertThat(response.verified()).isTrue();
+    }
+
+    @Test
+    void 프로필이_없어도_인증_뱃지는_파생된다() {
+        // 프로필 미생성(악기/소개 없음) 상태에서 어드민 직접지정만 있는 경우.
+        Member member = savedMember("v3");
+        verifiedPerformerService.grant(
+                new com.back.domain.verifiedperformer.dto.GrantRequest(member.getId(), "직접지정"), 99L);
+
+        ProfileResponse response = service.getMyProfile(member.getId());
+
+        assertThat(response.instruments()).isEmpty();
+        assertThat(response.verified()).isTrue();
+    }
+
+    @Test
+    void 수정_응답에도_인증_뱃지가_실린다() {
+        Member member = savedMember("v4");
+        verifiedPerformerService.grant(
+                new com.back.domain.verifiedperformer.dto.GrantRequest(member.getId(), "직접지정"), 99L);
+
+        ProfileResponse response = service.updateMyProfile(member.getId(),
+                new UpdateProfileRequest(List.of(Instrument.PIANO), "소개"));
+
+        assertThat(response.verified()).isTrue();
     }
 
     @Test

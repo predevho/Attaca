@@ -6,7 +6,7 @@
 
 ## 현재 상태
 
-* 단계: BE(인증/프로필/파일/DB) + FE 인증 플로우(Next.js BFF) 완료. 다음은 MEMBER 프로필 화면 또는 카카오 소셜 FE 또는 다음 도메인.
+* 단계: BE(인증/프로필/파일/DB + VERIFIED-PERFORMER) + FE(인증/프로필/카카오) 완료. 다음은 FE 인증연주자 화면 또는 다음 도메인(FEED/PERFORMANCE/RECRUITMENT/CHAT — 각 도메인 문서 선작성 필요).
 * 확정된 기술 스택
   * BE: Spring Boot 3.4.x / Java 21 / MySQL / Spring Security(JWT + OAuth2) / WebSocket(STOMP)+Redis / FileStorage 추상화(로컬 기본/S3 opt-in)
   * FE: Next.js 16(App Router)/React 19/TS/Tailwind/Vitest, 위치 `FE/`. BFF+httpOnly 쿠키. `cd FE && npm run dev`(:3000)
@@ -20,7 +20,7 @@
   * ⚠️ 이 개발 PC엔 시스템 환경변수 `DB_PASSWORD=1234`가 설정돼 있어 compose 기본값(`attaca-local`)을 덮어써 `bootRun`이 `Access denied`로 실패한다. 해결: `gradlew bootRun --args=--spring.datasource.password=attaca-local`로 override(명령행이 env보다 우선)하거나 `DB_PASSWORD`를 unset. compose 볼륨이 낡으면 `docker compose down -v` 후 재기동.
 * 테스트는 H2 `test` 프로파일: `@SpringBootTest`에는 반드시 `@ActiveProfiles("test")`를 붙일 것(없으면 MySQL 접속 시도로 실패). `application-test.yaml`이 datasource/storage 루트를 덮어쓴다.
 * 검증: Bean Validation 도입(`@Valid`). 검증 실패·본문 파싱 실패(enum 오타)·multipart 파트 누락은 400-01로 매핑(과거 500 결함 수정).
-* 도메인 문서 없이 해당 도메인 구현 금지. 현재 문서화된 도메인: COMMON, MEMBER, VERIFIED-PERFORMER(문서만, 구현 전).
+* 도메인 문서 없이 해당 도메인 구현 금지. 현재 구현된 도메인: COMMON, MEMBER, VERIFIED-PERFORMER(2026-07-16 BE 완료). 미착수(문서도 없음): FEED, PERFORMANCE, RECRUITMENT, CHAT.
 * 코드 스타일: 단순 필드 접근자는 Lombok `@Getter`로 통일(수동 getter 금지).
 * 응답 에러 본문은 `ErrorBody(resultCode:String, code:String, message)`. `resultCode`는 `HTTP상태-일련번호` 문자열(400-01/405-01/500-01).
 * 보안: 무상태 JWT(access+refresh, `/api/auth/reissue`). `jwt.secret`은 env(`JWT_SECRET`) 주입·커밋 금지. 인증 ErrorCode 401-01~08, 403-01.
@@ -28,6 +28,7 @@
 * MEMBER API(모두 `/api/auth/**` permit): `POST /signup{loginId,password,email,nickname}`, `POST /login{loginId,password}`, `POST /oauth/kakao{code,redirectUri}`. 로그인/소셜 모두 access+refresh 발급. 비번 BCrypt.
 * MEMBER 프로필 API(인증 필요): `GET/PUT /api/members/me/profile`, `PUT /api/members/me/profile/image`(image/*만), `GET /api/members/profile-options`. `Instrument` enum 21종(VOICE=성악/VOCAL=보컬 분리, 장르 없음). `MEMBER_NOT_FOUND`(404-03).
 * 소셜: 프론트 인가코드→백엔드 교환(`OAuthClient`/`KakaoOAuthClient`). 검증된 이메일만 자동연결, 미검증 거절(401-08). 카카오 키는 env(`KAKAO_CLIENT_ID`/`KAKAO_CLIENT_SECRET`) 주입·커밋 금지.
+* VERIFIED-PERFORMER(인증 연주자): 상태머신 엔티티 `VerificationApplication`(PENDING/APPROVED/REJECTED/REVOKED, `memberId`=원시 Long, 재신청=새 레코드). 회원 API `POST/GET /api/verified-performers/applications(/me)`. 어드민 API `/api/admin/verified-performers/**`(ROLE_ADMIN): 목록(`?status`+Pageable)·`{id}/approve|reject|revoke`·`grant`(직접지정). 활성 신청(PENDING/APPROVED) 유일 → 재신청 409. 뱃지는 `VerifiedPerformerService.isVerified`(APPROVED만 true)로 파생, MEMBER `ProfileResponse.verified`가 서비스 협력으로 채움(엔티티 직접참조 없음). 에러코드 409-04(ALREADY_PENDING)/409-05(ALREADY_APPROVED)/409-06(INVALID_APPLICATION_STATE)/404-04(APPLICATION_NOT_FOUND).
 * MEMBER 에러코드(전역 `ErrorCode`): EMAIL/NICKNAME/LOGIN_ID_ALREADY_EXISTS 409-01/02/03, LOGIN_FAILED 401-07, OAUTH_EMAIL_UNVERIFIED 401-08, OAUTH_PROVIDER_ERROR 502-01.
 * 파일 저장: `FileStorage`(바이트) + `FileService`(key생성·메타데이터). 도메인은 `FileService`만 사용. `storage.type`=local(기본)/s3. 로컬은 `/files/**`로 서빙(SecurityConfig permit).
 * S3 키(`S3_BUCKET`/`AWS_ACCESS_KEY_ID`/`AWS_SECRET_ACCESS_KEY`)는 env 주입·커밋 금지. **실제 S3 연동은 아직 미검증**(자격증명 미발급, 자동 테스트는 S3Client 목).

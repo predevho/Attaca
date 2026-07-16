@@ -16,9 +16,9 @@
 
 * [ ] MEMBER: 소셜 로그인 provider 확장(구글 등 — `OAuthClient` 어댑터 추가) *(카카오는 2026-07-13 완료)*
 * [ ] MEMBER: 실제 인증메일 발송(가입 이메일 검증) — 메일 인프라 도입 시
-* [ ] VERIFIED-PERFORMER: 인증 연주자 신청 → 어드민 승인/거절/철회, 뱃지 (구현 — 문서는 2026-07-15 완료)
-  * 설계 확정(2026-07-15, DOMAIN-VERIFIED-PERFORMER-*): 별도 엔티티 `VerificationApplication`, 상태 4종(PENDING/APPROVED/REJECTED/REVOKED), 재신청=새 레코드, 어드민 직접지정. 뱃지는 MEMBER `ProfileResponse.verified`로 파생 노출(`isVerified` 서비스 협력). 에러코드 409-04~06/404-04. Member에 boolean 미추가.
-  * 공개 인증자 목록/신청 첨부파일/이력 테이블은 범위 밖(추후).
+* [x] ~~VERIFIED-PERFORMER: 인증 연주자 신청 → 어드민 승인/거절/철회, 뱃지~~ — 2026-07-16 BE 구현 완료(TDD). 엔티티/상태머신 + 회원 API 2종 + 어드민 API 5종 + `isVerified` 협력 + MEMBER `ProfileResponse.verified` 통합. 에러코드 409-04~06/404-04 추가.
+  * 확정한 결정: `memberId`=원시 Long, `GET .../applications/me` 이력없음=200+data:null, 어드민 목록=`?status`+Pageable(createdAt desc, id 타이브레이크), 뱃지는 프로필 미생성 회원도 파생.
+  * 남은 범위 밖: 공개 인증자 목록/신청 첨부파일/이력 테이블, 어드민 grant 시 회원 존재 검증(느슨한 결합 유지로 미도입), 실FE 화면.
 * [ ] FEED: 게시글/댓글/좋아요, 피드 타임라인
 * [ ] PERFORMANCE: 연주회 등록·홍보, 피드 카드 노출 연동
 * [ ] RECRUITMENT: 구인/구직 공고 + 지원
