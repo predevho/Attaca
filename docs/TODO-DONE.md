@@ -4,6 +4,15 @@
 
 ---
 
+* [x] (2026-07-17) FEED(피드) BE 도메인 구현 (TDD, 서브에이전트 주도 11태스크)
+  * 엔티티 4종: `Post`/`Comment`(평면, soft delete) + `PostLike`/`CommentLike`(유니크, 멱등). 작성자는 원시 `authorId`(Long)
+  * 리포지토리: id 기준 커서 keyset(타임라인 최신순 desc / 댓글 오래된순 asc), 배치 카운트(`GROUP BY ... IN :ids`)와 내 좋아요 집합 → 목록 N+1 방지(페이지당 고정 쿼리)
+  * 서비스 3종: `FeedPostService`(작성/조회/타임라인/수정=작성자/삭제=작성자·ADMIN), `FeedCommentService`(작성/커서목록/삭제), `FeedLikeService`(게시글·댓글 좋아요·취소 멱등)
+  * 좋아요 동시성: 유니크 제약 + `saveAndFlush`+`DataIntegrityViolationException` catch로 이중요청에도 멱등 200 보장(STATUTE §4)
+  * 컨트롤러 3종(`/api/feed/**`): 어드민 판정은 principal 역할(`ROLE_ADMIN`)로, 어드민 전용 경로 없음. 커서 size 기본 20/최대 50
+  * MEMBER 협력: `MemberQueryService.findDisplaysByIds`(닉네임+인증뱃지 배치 파생) 신설 + `VerifiedPerformerService.findVerifiedMemberIds`(승인 회원 배치) 추가 — fetch join 불가(도메인 경계상 연관 없음)라 서비스 협력+IN 배치로 처리
+  * 전역 `ErrorCode` 2종: `POST_NOT_FOUND`(404-05)/`COMMENT_NOT_FOUND`(404-06)
+  * 전 계층 TDD, 태스크마다 독립 리뷰(리뷰가 잡은 실버그: 좋아요 유니크 제약 컬럼명 camelCase→snake_case 정정), 최종 전체-브랜치 리뷰 MERGEABLE. 전체 `test` 통과
 * [x] (2026-07-16) VERIFIED-PERFORMER(인증 연주자) BE 도메인 구현 (TDD)
   * 상태 머신 엔티티 `VerificationApplication`(PENDING/APPROVED/REJECTED/REVOKED) — `apply`/`grantByAdmin` 팩토리 + `approve`/`reject`/`revoke` 전이(종결 상태 재처리 시 `INVALID_APPLICATION_STATE`). `memberId`는 원시 Long(느슨한 결합), 재신청=새 레코드로 이력 보존
   * 리포지토리: `existsByMemberIdAndStatus`(활성 유일성·뱃지 판정), `findTop...OrderByCreatedAtDescIdDesc`(최신 신청 — createdAt 동률을 id로 타이브레이크해 결정적 정렬), `findByStatus...`(어드민 페이징)

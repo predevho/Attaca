@@ -164,10 +164,12 @@ com.back.domain.feed
 
 ---
 
-## 11. 구현 착수 시 확정할 것
+## 11. 구현 착수 시 확정한 결정 (2026-07-17 BE 구현)
 
-* 커서 목록 기본/최대 `size`.
-* 좋아요 응답 본문 형태(빈 성공 vs 갱신된 likeCount/likedByMe).
-* `MemberQueryService` 신설 vs 기존 MEMBER 서비스 확장(배치 조회 위치), `MemberDisplay` DTO 위치.
-* `content` 공백/개행 정규화 정책.
-* 게시글 단건 조회에도 댓글 일부를 함께 줄지(현재 초안은 분리 조회).
+* 커서 `size`: **기본 20, 최대 50**(초과 clamp, `<1`이면 기본). 컨트롤러에서 clamp.
+* 좋아요 응답: **빈 성공**(`ApiResponse.success()`). 카운트는 목록/단건 조회에서 제공.
+* 배치 조회 위치: MEMBER에 **`MemberQueryService` 신설**, `MemberDisplay`는 `com.back.domain.member.dto`. 인증뱃지 N+1 방지는 `VerifiedPerformerService.findVerifiedMemberIds(Set)` 배치.
+* `content` 정규화: 별도 트림 없이 `@NotBlank`로 공백-only만 차단(게시글 `@Size(max=2000)`, 댓글 `@Size(max=500)`).
+* 게시글 단건 조회는 댓글을 포함하지 않음(댓글은 별도 커서 엔드포인트).
+* 좋아요 동시성: 유니크 제약을 최종 방어선으로, `saveAndFlush` + `DataIntegrityViolationException` catch로 이중요청에도 멱등 200 유지(§4).
+* 좋아요 유니크 제약의 `@UniqueConstraint(columnNames=...)`는 **물리 컬럼명(snake_case)** 을 쓴다: `{"member_id","post_id"}` / `{"member_id","comment_id"}` (JPA 필드명 camelCase가 아님 — Hibernate 기본 네이밍 전략 기준).
