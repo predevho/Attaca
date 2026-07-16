@@ -39,6 +39,12 @@ public enum ErrorCode {
     OAUTH_EMAIL_UNVERIFIED("401-08", HttpStatus.UNAUTHORIZED, "소셜 계정의 이메일이 확인되지 않았습니다."),
     OAUTH_PROVIDER_ERROR("502-01", HttpStatus.BAD_GATEWAY, "소셜 로그인 제공자 연동에 실패했습니다."),
 
+    // --- VERIFIED-PERFORMER(인증 연주자) ---
+    VERIFICATION_ALREADY_PENDING("409-04", HttpStatus.CONFLICT, "이미 심사 대기 중인 신청이 있습니다."),
+    VERIFICATION_ALREADY_APPROVED("409-05", HttpStatus.CONFLICT, "이미 인증된 회원입니다."),
+    INVALID_APPLICATION_STATE("409-06", HttpStatus.CONFLICT, "이미 종결된 신청은 다시 처리할 수 없습니다."),
+    APPLICATION_NOT_FOUND("404-04", HttpStatus.NOT_FOUND, "인증 신청을 찾을 수 없습니다."),
+
     // --- 파일 저장 ---
     INVALID_FILE("400-02", HttpStatus.BAD_REQUEST, "올바르지 않은 파일입니다."),
     FILE_NOT_FOUND("404-01", HttpStatus.NOT_FOUND, "파일을 찾을 수 없습니다."),
