@@ -100,6 +100,17 @@ class RecruitmentApplicationControllerTest {
     }
 
     @Test
+    void 작성자는_지원자를_거절한다() throws Exception {
+        String postingId = createPosting();
+        String applicationId = apply(postingId);
+
+        mockMvc.perform(post("/api/recruitments/applications/" + applicationId + "/reject")
+                        .header("Authorization", authorBearer))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.status").value("REJECTED"));
+    }
+
+    @Test
     void 지원자는_내지원목록을_보고_철회한다() throws Exception {
         String postingId = createPosting();
         String applicationId = apply(postingId);
