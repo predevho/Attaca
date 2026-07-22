@@ -107,7 +107,10 @@ class RecruitmentRepositoryTest {
 
     @Test
     void deadline이_now와_정확히_같으면_CLOSED로_분류된다() {
-        LocalDateTime now = LocalDateTime.now();
+        // 고정된 초 단위 리터럴을 쓴다: LocalDateTime.now()의 초 이하 정밀도가
+        // 저장 컬럼과 JPQL :now 파라미터 바인딩 사이에서 동일하게 왕복하지 않아
+        // 경계(==) 비교가 비결정적이 되는 문제를 피한다.
+        LocalDateTime now = LocalDateTime.of(2026, 6, 1, 12, 0, 0);
         save(Set.of(Instrument.CELLO), now, false);
 
         var open = postingRepository.findOpen(RecruitmentStatus.OPEN, now, null,
