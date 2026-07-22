@@ -56,7 +56,15 @@ public enum ErrorCode {
 
     // --- PERFORMANCE ---
     PERFORMANCE_NOT_FOUND("404-07", HttpStatus.NOT_FOUND, "공연을 찾을 수 없습니다."),
-    NOT_VERIFIED_PERFORMER("403-02", HttpStatus.FORBIDDEN, "인증 연주자만 공연을 등록할 수 있습니다.");
+    NOT_VERIFIED_PERFORMER("403-02", HttpStatus.FORBIDDEN, "인증 연주자만 공연을 등록할 수 있습니다."),
+
+    // --- RECRUITMENT(구인) ---
+    RECRUITMENT_NOT_FOUND("404-08", HttpStatus.NOT_FOUND, "구인 공고를 찾을 수 없습니다."),
+    RECRUITMENT_APPLICATION_NOT_FOUND("404-09", HttpStatus.NOT_FOUND, "지원 내역을 찾을 수 없습니다."),
+    RECRUITMENT_CLOSED("409-07", HttpStatus.CONFLICT, "마감된 공고에는 지원할 수 없습니다."),
+    ALREADY_APPLIED("409-08", HttpStatus.CONFLICT, "이미 지원한 공고입니다."),
+    CANNOT_APPLY_OWN_RECRUITMENT("409-09", HttpStatus.CONFLICT, "본인이 올린 공고에는 지원할 수 없습니다."),
+    RECRUITMENT_INVALID_APPLICATION_STATE("409-10", HttpStatus.CONFLICT, "이미 처리된 지원은 다시 처리할 수 없습니다.");
 
     private final String resultCode;
     private final HttpStatus status;

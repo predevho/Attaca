@@ -4,6 +4,15 @@
 
 ---
 
+* [x] (2026-07-23) RECRUITMENT(구인) BE 도메인 구현 (TDD, 서브에이전트 주도 8태스크)
+  * 엔티티 2종: `RecruitmentPosting`(authorId=원시 Long, title/description/instruments(다중 악기 `@ElementCollection`, `@BatchSize`)/recruitCount/location/fee/deadline(nullable=상시)/status(OPEN/CLOSED), soft delete) + `RecruitmentApplication`(postingId/applicantId 원시 Long, message, 상태머신 PENDING→ACCEPTED/REJECTED/WITHDRAWN)
+  * 리포지토리: 공고 scope별(open=OPEN·미마감 / closed=CLOSED·마감지남 / all) + `instrument` 필터(JPQL `member of`) + soft delete 필터; 지원 활성지원 존재판정(`existsBy...StatusIn` [PENDING,ACCEPTED]) + 공고별/지원자별 페이징. `deadline==now`는 CLOSED(경계 결정적 테스트)
+  * 서비스 2종: `RecruitmentPostingService`(등록=인증 회원 누구나·게이팅 없음/조회/목록/수정=작성자/마감=작성자/삭제=작성자·ADMIN, `findActive` 재사용), `RecruitmentApplicationService`(지원=본인공고·마감·중복 게이팅/지원자목록=작성자/내지원목록/수락·거절=작성자/철회=지원자, guard 순서 확정)
+  * 컨트롤러 2종(`/api/recruitments`): 공고 CRUD+마감, 지원 POST `{id}/applications`·GET `{id}/applications`(작성자)·GET `applications/me`·accept/reject/withdraw. 어드민 판정 principal 역할, 어드민 전용 경로 없음. size 기본 20/최대 50
+  * MEMBER 협력: 작성자·지원자 표시(닉네임+인증뱃지)를 `MemberQueryService.findDisplaysByIds` 배치 재사용으로 파생(N+1 없음)
+  * 전역 `ErrorCode` 6종: `RECRUITMENT_NOT_FOUND`(404-08)/`RECRUITMENT_APPLICATION_NOT_FOUND`(404-09)/`RECRUITMENT_CLOSED`(409-07)/`ALREADY_APPLIED`(409-08)/`CANNOT_APPLY_OWN_RECRUITMENT`(409-09)/`RECRUITMENT_INVALID_APPLICATION_STATE`(409-10)
+  * 전 계층 TDD, 태스크마다 독립 리뷰(리뷰 지적 반영: 리포/서비스/컨트롤러 테스트 커버리지 보강 3회, deadline==now 경계 비결정성 수정). 최종 전체-브랜치 리뷰 Ready-with-fixes → instruments N+1을 `@BatchSize(100)`로 수정. 전체 `test` 266/266 통과
+  * 범위 밖: 구직 공고, PERFORMANCE 연결, 지원 첨부파일, CHAT 연계, 키워드/태그 검색, 알림, 마감 자동화 배치, applicationCount 응답 필드, 공통 PageResponse DTO
 * [x] (2026-07-22) PERFORMANCE(연주회) BE 도메인 구현 (TDD, 서브에이전트 주도 6태스크)
   * 엔티티 `Performance`(organizerId=원시 Long, title/description/performedAt(시작 일시)/venue/program(자유텍스트)/ticketInfo/ticketUrl/posterImageKey, soft delete)
   * 리포지토리: scope별 목록(upcoming=`performedAt>=now` asc / past=`<now` desc / all=desc, `deletedAt IS NULL` 필터) + 단건(active)
