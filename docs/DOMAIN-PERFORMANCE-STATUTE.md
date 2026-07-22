@@ -130,10 +130,12 @@ com.back.domain.performance
 
 ---
 
-## 11. 구현 착수 시 확정할 것
+## 11. 구현 착수 시 확정한 결정 (2026-07-22 BE 구현)
 
-* `PUT /{id}/poster` 응답 형태(갱신된 `PerformanceResponse` vs 이미지 URL만).
-* 목록 기본/최대 `size`.
-* `performedAt` 과거 일시 등록 허용 여부(과거 공연 사전 등록/기록용 — 현재 초안은 허용).
-* `edit` 시 `performedAt`·`venue` 등 필수 필드 검증 방식(등록과 동일 `@Valid`).
-* `description`/`program` 공백/개행 정규화 정책.
+* `PUT /{id}/poster` 응답 = **갱신된 `PerformanceResponse`**(posterImageUrl 포함).
+* 목록 `size` = **기본 20, 최대 50**(초과 clamp, `<1`이면 기본). `page<0`이면 0. 컨트롤러에서 처리.
+* `performedAt` 과거 일시 등록 = **허용**(과거 공연 기록용, scope=past 로 노출).
+* `edit` = 등록과 동일 `PerformanceRequest`(`@Valid`, 전체 교체).
+* `description`/`program` 정규화 = 별도 트림 없이 `@NotBlank`(title/venue) + `@Size` 로만 제약.
+* 어드민 판정 `isAdmin` = `PerformanceController` 로컬 static(FEED의 것과 공용 헬퍼 추출은 BACKLOG).
+* 목록 응답 = `Page<PerformanceResponse>`(Spring Pageable). PageImpl 직렬화 안정화를 위한 공통 `PageResponse` DTO 도입은 코드베이스 공통 BACKLOG(VERIFIED-PERFORMER 목록과 함께).

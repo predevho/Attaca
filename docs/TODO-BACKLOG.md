@@ -21,9 +21,8 @@
   * 남은 범위 밖: 공개 인증자 목록/신청 첨부파일/이력 테이블, 어드민 grant 시 회원 존재 검증(느슨한 결합 유지로 미도입), 실FE 화면.
 * [x] ~~FEED: 게시글/댓글/좋아요, 피드 타임라인~~ — 2026-07-17 BE 구현 완료(TDD, 서브에이전트 주도). 엔티티 4종 + 리포지토리(커서/배치) + 서비스 3종 + 컨트롤러 3종 + MEMBER 배치 협력(MemberQueryService). 에러코드 404-05/06. 전 계층 테스트 + 전체 회귀 통과, 최종 전체-브랜치 리뷰 MERGEABLE.
   * 남은 범위 밖: 이미지첨부·대댓글·댓글수정·팔로우타임라인·신고·PERFORMANCE 카드.
-* [ ] PERFORMANCE: 연주회 등록·홍보 (BE 구현 — 문서는 2026-07-22 완료)
-  * 설계 확정(2026-07-22, DOMAIN-PERFORMANCE-*): 엔티티 `Performance`(organizerId=Long, title/description/performedAt/venue/program(자유텍스트)/ticketInfo/ticketUrl/posterImageKey, soft delete). 등록=인증 연주자 또는 ADMIN(`isVerified` 협력, 아니면 403-02), 수정=주최자, 삭제=주최자·ADMIN. 목록=Spring Pageable + scope(upcoming/past/all). 주최자 표시는 `MemberQueryService` 배치 재사용. 포스터는 FileService(image/*). 에러코드 404-07/403-02.
-  * 범위 밖: 관심/북마크, 피드 카드 노출, 곡목 구조화, 좌석/예매, 공개 조회, 태그/장르 필터.
+* [x] ~~PERFORMANCE: 연주회 등록·홍보~~ — 2026-07-22 BE 구현 완료(TDD, 서브에이전트 주도 6태스크). 엔티티 `Performance`(soft delete) + 리포지토리(scope별) + 서비스(등록 게이팅/CRUD/포스터) + 컨트롤러 + MEMBER 배치 협력 재사용. 에러코드 404-07/403-02. 전 계층 테스트 + 전체 회귀 통과, 최종 전체-브랜치 리뷰 MERGEABLE.
+  * 남은 범위 밖: 관심/북마크, 피드 카드 노출, 곡목 구조화, 좌석/예매, 공개 조회, 태그/장르 필터.
 * [ ] RECRUITMENT: 구인/구직 공고 + 지원
 * [ ] CHAT: WebSocket(STOMP)+Redis 기반 1:1 / 1:N 채팅
 * [x] ~~FE: MEMBER 프로필 화면(조회/수정/이미지)~~ — 2026-07-16 완료(조회/수정 모드, 이미지 즉시 업로드, beFetch 멀티파트 지원). 라이브 수동 검증까지 성공(멀티파트 실체인: 브라우저→BFF→Spring @RequestPart→디스크→/files/** 서빙→DB key 저장·새로고침 유지). 실이미지 S3 검증만 별개 BACKLOG.
@@ -33,9 +32,10 @@
 
 * [ ] FE: BFF 라우트 status 폴백 일괄 수정 — 모든 BFF 라우트가 `{ status: res.status || 200 }`을 써서 BE 연결 실패(`beFetch` status 0)를 HTTP 200으로 응답한다. 현재 클라이언트는 바디의 `ok`로 판단해 무해하나, status 기준 소비처가 생기면 오작동. `res.status || 502`(또는 `=== 0 ? 502`)로 login/signup/logout/me/oauth·프로필 등 전체를 한 번에 정리. (2026-07-16 프로필 리뷰에서 식별)
 
-## FEED 정리 (최종 리뷰에서 이연된 Minor)
+## BE 공통 정리 (도메인 리뷰에서 이연된 Minor)
 
-* [ ] FEED: `clamp(size)`가 `FeedPostController`/`FeedCommentController`에 중복 — 공용 헬퍼로 추출(예: `FeedPostController.isAdmin`처럼 정적 헬퍼 재사용). (2026-07-17 최종 리뷰 식별)
+* [ ] BE: 오프셋 페이징 응답을 안정적 `PageResponse<T>` DTO로 공통화 — 현재 VERIFIED-PERFORMER 어드민 목록·PERFORMANCE 목록이 `Page<T>`(PageImpl)를 그대로 직렬화해 Spring Boot 3.4의 "PageImpl 직렬화 비권장" 경고가 뜬다(동작·테스트는 정상). JSON 계약 안정화를 위해 공통 DTO로 감싸는 것을 검토. (2026-07-22 PERFORMANCE 최종 리뷰 식별)
+* [ ] FEED/PERFORMANCE: `clamp(size)`·`isAdmin(Authentication)`가 여러 컨트롤러에 중복 — 공용 헬퍼로 추출. (2026-07-17/07-22 리뷰 식별)
 * [ ] FEED: `VerificationApplicationRepository.findApprovedMemberIds`의 JPQL이 enum을 FQN 리터럴로 사용 → `@Param`으로 파라미터 바인딩 정리(리네임 취약). 해당 테스트의 인라인 `java.util.Set`도 import로. (2026-07-17)
 
 ## BE 공통 (도메인 확장 전후로 필요)
