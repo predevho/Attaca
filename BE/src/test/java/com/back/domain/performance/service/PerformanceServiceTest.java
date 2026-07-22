@@ -19,6 +19,7 @@ import com.back.global.storage.FileMetadataRepository;
 import com.back.global.storage.FileService;
 import com.back.global.storage.FileStorage;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
@@ -27,6 +28,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.mock.web.MockMultipartFile;
 
 @DataJpaTest
 class PerformanceServiceTest {
@@ -156,6 +158,45 @@ class PerformanceServiceTest {
 
         service.deletePerformance(normalId, true, created.id()); // 어드민 모더레이션
         assertThat(performanceRepository.findByIdAndDeletedAtIsNull(created.id())).isEmpty();
+    }
+
+    private MockMultipartFile png() {
+        return new MockMultipartFile("file", "poster.png", "image/png",
+                "img".getBytes(StandardCharsets.UTF_8));
+    }
+
+    @Test
+    void 주최자는_포스터를_올릴_수_있고_url이_실린다() {
+        PerformanceResponse created = service.register(verifiedId, false,
+                request(LocalDateTime.now().plusDays(3)));
+
+        PerformanceResponse withPoster = service.updatePoster(verifiedId, created.id(), png());
+
+        assertThat(withPoster.posterImageUrl()).isNotBlank();
+        assertThat(performanceRepository.findByIdAndDeletedAtIsNull(created.id())
+                .orElseThrow().getPosterImageKey()).startsWith("performance/").endsWith(".png");
+    }
+
+    @Test
+    void 주최자가_아니면_포스터_업로드는_FORBIDDEN() {
+        PerformanceResponse created = service.register(verifiedId, false,
+                request(LocalDateTime.now().plusDays(3)));
+
+        assertThatThrownBy(() -> service.updatePoster(normalId, created.id(), png()))
+                .isInstanceOf(BusinessException.class)
+                .satisfies(t -> assertThat(errorOf(t)).isEqualTo(ErrorCode.FORBIDDEN));
+    }
+
+    @Test
+    void 이미지가_아닌_포스터는_INVALID_FILE() {
+        PerformanceResponse created = service.register(verifiedId, false,
+                request(LocalDateTime.now().plusDays(3)));
+        MockMultipartFile pdf = new MockMultipartFile("file", "a.pdf", "application/pdf",
+                "x".getBytes(StandardCharsets.UTF_8));
+
+        assertThatThrownBy(() -> service.updatePoster(verifiedId, created.id(), pdf))
+                .isInstanceOf(BusinessException.class)
+                .satisfies(t -> assertThat(errorOf(t)).isEqualTo(ErrorCode.INVALID_FILE));
     }
 
     /** 디스크/AWS 없이 검증하기 위한 인메모리 저장소(FileServiceTest 패턴). */

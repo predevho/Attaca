@@ -11,6 +11,7 @@ import com.back.domain.verifiedperformer.service.VerifiedPerformerService;
 import com.back.global.exception.BusinessException;
 import com.back.global.exception.ErrorCode;
 import com.back.global.storage.FileService;
+import com.back.global.storage.StoredFile;
 import java.time.LocalDateTime;
 import java.util.Map;
 import java.util.Set;
@@ -20,6 +21,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 /**
  * 연주회 등록/조회/목록/수정/삭제. 등록 자격은 인증 연주자 또는 어드민.
@@ -28,6 +30,8 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @RequiredArgsConstructor
 public class PerformanceService {
+
+    private static final String POSTER_DIRECTORY = "performance";
 
     private final PerformanceRepository performanceRepository;
     private final MemberQueryService memberQueryService;
@@ -84,6 +88,31 @@ public class PerformanceService {
             throw new BusinessException(ErrorCode.FORBIDDEN);
         }
         performance.delete();
+    }
+
+    @Transactional
+    public PerformanceResponse updatePoster(Long organizerId, Long id, MultipartFile file) {
+        validateImage(file);
+        Performance performance = findActive(id);
+        if (!performance.getOrganizerId().equals(organizerId)) {
+            throw new BusinessException(ErrorCode.FORBIDDEN);
+        }
+        String oldKey = performance.getPosterImageKey();
+        StoredFile stored = fileService.upload(file, POSTER_DIRECTORY, organizerId);
+        performance.changePoster(stored.storageKey());
+        // 새 이미지 저장이 확정된 뒤에만 옛 파일을 제거한다 — 실패해도 이미지 유실 없음(프로필 이미지 패턴).
+        if (oldKey != null) {
+            fileService.delete(oldKey);
+        }
+        return toResponse(performance);
+    }
+
+    /** 이미지 타입만 허용. 크기 상한은 전역 multipart 설정이 담당. */
+    private void validateImage(MultipartFile file) {
+        if (file == null || file.getContentType() == null
+                || !file.getContentType().startsWith("image/")) {
+            throw new BusinessException(ErrorCode.INVALID_FILE, "이미지 파일만 업로드할 수 있습니다.");
+        }
     }
 
     private Performance findActive(Long id) {
