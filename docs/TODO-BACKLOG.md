@@ -8,7 +8,7 @@
 
 * [x] ~~DOMAIN-VERIFIED-PERFORMER-CONSTITUTION.md / STATUTE.md~~ (2026-07-15 작성 완료)
 * [x] ~~DOMAIN-FEED-CONSTITUTION.md / STATUTE.md~~ (2026-07-17 작성 완료)
-* [ ] DOMAIN-PERFORMANCE-CONSTITUTION.md / STATUTE.md
+* [x] ~~DOMAIN-PERFORMANCE-CONSTITUTION.md / STATUTE.md~~ (2026-07-22 작성 완료)
 * [ ] DOMAIN-RECRUITMENT-CONSTITUTION.md / STATUTE.md
 * [ ] DOMAIN-CHAT-CONSTITUTION.md / STATUTE.md
 
@@ -21,7 +21,9 @@
   * 남은 범위 밖: 공개 인증자 목록/신청 첨부파일/이력 테이블, 어드민 grant 시 회원 존재 검증(느슨한 결합 유지로 미도입), 실FE 화면.
 * [x] ~~FEED: 게시글/댓글/좋아요, 피드 타임라인~~ — 2026-07-17 BE 구현 완료(TDD, 서브에이전트 주도). 엔티티 4종 + 리포지토리(커서/배치) + 서비스 3종 + 컨트롤러 3종 + MEMBER 배치 협력(MemberQueryService). 에러코드 404-05/06. 전 계층 테스트 + 전체 회귀 통과, 최종 전체-브랜치 리뷰 MERGEABLE.
   * 남은 범위 밖: 이미지첨부·대댓글·댓글수정·팔로우타임라인·신고·PERFORMANCE 카드.
-* [ ] PERFORMANCE: 연주회 등록·홍보, 피드 카드 노출 연동
+* [ ] PERFORMANCE: 연주회 등록·홍보 (BE 구현 — 문서는 2026-07-22 완료)
+  * 설계 확정(2026-07-22, DOMAIN-PERFORMANCE-*): 엔티티 `Performance`(organizerId=Long, title/description/performedAt/venue/program(자유텍스트)/ticketInfo/ticketUrl/posterImageKey, soft delete). 등록=인증 연주자 또는 ADMIN(`isVerified` 협력, 아니면 403-02), 수정=주최자, 삭제=주최자·ADMIN. 목록=Spring Pageable + scope(upcoming/past/all). 주최자 표시는 `MemberQueryService` 배치 재사용. 포스터는 FileService(image/*). 에러코드 404-07/403-02.
+  * 범위 밖: 관심/북마크, 피드 카드 노출, 곡목 구조화, 좌석/예매, 공개 조회, 태그/장르 필터.
 * [ ] RECRUITMENT: 구인/구직 공고 + 지원
 * [ ] CHAT: WebSocket(STOMP)+Redis 기반 1:1 / 1:N 채팅
 * [x] ~~FE: MEMBER 프로필 화면(조회/수정/이미지)~~ — 2026-07-16 완료(조회/수정 모드, 이미지 즉시 업로드, beFetch 멀티파트 지원). 라이브 수동 검증까지 성공(멀티파트 실체인: 브라우저→BFF→Spring @RequestPart→디스크→/files/** 서빙→DB key 저장·새로고침 유지). 실이미지 S3 검증만 별개 BACKLOG.
