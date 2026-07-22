@@ -23,6 +23,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 
 @DataJpaTest
@@ -138,5 +139,40 @@ class RecruitmentApplicationServiceTest {
         RecruitmentApplicationResponse reapplied = service.apply(applicantId, postingId,
                 new ApplyRecruitmentRequest("m2"));
         assertThat(reapplied.status()).isEqualTo(RecruitmentApplicationStatus.PENDING);
+    }
+
+    @Test
+    void 작성자는_여러_지원자목록을_조회하고_지원자정보가_모두_채워진다() {
+        Long postingId = openPosting(LocalDateTime.now().plusDays(7));
+        Long applicant2Id = memberRepository
+                .save(Member.createLocal("app2", "pw", "p2@x.com", "지원자2")).getId();
+
+        service.apply(applicantId, postingId, new ApplyRecruitmentRequest("m1"));
+        service.apply(applicant2Id, postingId, new ApplyRecruitmentRequest("m2"));
+
+        Page<RecruitmentApplicationResponse> page = service.getApplicationsForPosting(authorId,
+                postingId, PageRequest.of(0, 10));
+
+        assertThat(page.getTotalElements()).isEqualTo(2);
+        assertThat(page.getContent()).allSatisfy(res -> {
+            assertThat(res.applicant()).isNotNull();
+            assertThat(res.applicant().nickname()).isIn("지원자", "지원자2");
+        });
+    }
+
+    @Test
+    void 지원자는_본인의_지원목록을_전체조회한다() {
+        Long postingId1 = openPosting(LocalDateTime.now().plusDays(7));
+        Long postingId2 = openPosting(LocalDateTime.now().plusDays(7));
+
+        service.apply(applicantId, postingId1, new ApplyRecruitmentRequest("m1"));
+        service.apply(applicantId, postingId2, new ApplyRecruitmentRequest("m2"));
+
+        Page<RecruitmentApplicationResponse> page = service.getMyApplications(applicantId,
+                PageRequest.of(0, 10));
+
+        assertThat(page.getTotalElements()).isEqualTo(2);
+        assertThat(page.getContent()).allSatisfy(res ->
+                assertThat(res.applicant().nickname()).isEqualTo("지원자"));
     }
 }
