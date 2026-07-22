@@ -81,6 +81,7 @@ com.back.domain.recruitment
 
 - 상태: `PENDING` → `ACCEPTED`/`REJECTED`(공고 작성자) / `WITHDRAWN`(지원자, PENDING에서만).
 - **활성 지원(PENDING/ACCEPTED) 유일**: 같은 공고에 활성 지원이 이미 있으면 재지원 불가(`ALREADY_APPLIED`, 409). `REJECTED`/`WITHDRAWN` 뒤엔 재지원(새 레코드) 허용(VERIFIED-PERFORMER의 활성신청 유일 판정 패턴 재사용).
+  - 이 유일성은 서비스 계층의 존재 확인 후 저장(check-then-save)으로 판정하는 **best-effort**다. 상태 조건부(PENDING/ACCEPTED) 유니크라 부분 유니크 인덱스가 까다로워 DB 제약은 두지 않는다(VERIFIED-PERFORMER 선례와 동일). 극단적 동시 지원 시 중복 활성 지원이 드물게 생길 수 있으나 기능상 무해하다.
 - 공고가 CLOSED/마감돼도 **기존 PENDING 지원은 유지**되고 작성자가 계속 수락/거절 가능. **신규 지원만** 차단.
 
 | 행위 | 자격 | 조건 | 위반 시 |
@@ -109,6 +110,7 @@ com.back.domain.recruitment
   * FEED/PERFORMANCE에서 쓰는 `MemberQueryService.findDisplaysByIds(Set<Long>) → Map<Long, MemberDisplay>`를 재사용한다(`MemberDisplay{memberId, nickname, verified}`).
   * 목록 응답은 페이지의 `authorId`/`applicantId` 묶음을 한 번에 조회해 N+1을 피한다.
 * fetch join을 쓰지 않는 이유: 도메인 경계상 `RecruitmentPosting`/`RecruitmentApplication`에 `Member` 연관 매핑이 없다(작성자·지원자는 원시 Long). 표시정보는 서비스 협력 + IN 배치 조회로 조립한다.
+* 공고의 `instruments`(`@ElementCollection`, 다중 악기)는 목록 매핑 시 행마다 지연 로딩되면 N+1이 되므로 `@BatchSize(size = 100)`로 배치 초기화한다(페이지 한 번당 IN 한 번). 전역 `default_batch_fetch_size`는 두지 않고 이 컬렉션에만 스코프한다.
 
 ---
 
