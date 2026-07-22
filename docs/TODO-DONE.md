@@ -4,6 +4,14 @@
 
 ---
 
+* [x] (2026-07-22) PERFORMANCE(연주회) BE 도메인 구현 (TDD, 서브에이전트 주도 6태스크)
+  * 엔티티 `Performance`(organizerId=원시 Long, title/description/performedAt(시작 일시)/venue/program(자유텍스트)/ticketInfo/ticketUrl/posterImageKey, soft delete)
+  * 리포지토리: scope별 목록(upcoming=`performedAt>=now` asc / past=`<now` desc / all=desc, `deletedAt IS NULL` 필터) + 단건(active)
+  * 서비스 `PerformanceService`: 등록(인증 연주자 또는 ADMIN — `isVerified` 협력, 아니면 403-02)/조회/목록/수정(주최자)/삭제(주최자·ADMIN)/포스터(주최자, image/*, 교체 시 옛파일 삭제 후행)
+  * 컨트롤러(`/api/performances`): POST 등록·GET 목록(`?scope`+Pageable)·GET/{id}·PUT/{id}·DELETE/{id}·PUT/{id}/poster. 어드민 판정은 principal 역할, 어드민 전용 경로 없음. size 기본 20/최대 50
+  * MEMBER 협력: 주최자 표시(닉네임+인증뱃지)를 `MemberQueryService.findDisplaysByIds` 배치 재사용으로 파생(N+1 없음). FileService(포스터)·VerifiedPerformerService(등록 자격) 재사용
+  * 전역 `ErrorCode` 2종: `PERFORMANCE_NOT_FOUND`(404-07)/`NOT_VERIFIED_PERFORMER`(403-02)
+  * 전 계층 TDD, 태스크마다 독립 리뷰, 최종 전체-브랜치 리뷰 MERGEABLE(Critical 0). 이연 Important: 목록 PageImpl 직렬화 경고 → 코드베이스 공통 PageResponse DTO는 BACKLOG. 전체 `test` 통과
 * [x] (2026-07-17) FEED(피드) BE 도메인 구현 (TDD, 서브에이전트 주도 11태스크)
   * 엔티티 4종: `Post`/`Comment`(평면, soft delete) + `PostLike`/`CommentLike`(유니크, 멱등). 작성자는 원시 `authorId`(Long)
   * 리포지토리: id 기준 커서 keyset(타임라인 최신순 desc / 댓글 오래된순 asc), 배치 카운트(`GROUP BY ... IN :ids`)와 내 좋아요 집합 → 목록 N+1 방지(페이지당 고정 쿼리)
