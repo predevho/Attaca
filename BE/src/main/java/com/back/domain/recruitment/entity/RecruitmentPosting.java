@@ -21,6 +21,7 @@ import java.util.Set;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.BatchSize;
 
 /** 구인 공고. 작성자는 원시 authorId(Long)로만 참조한다. 삭제는 soft delete. */
 @Entity
@@ -48,6 +49,7 @@ public class RecruitmentPosting extends BaseEntity {
             joinColumns = @JoinColumn(name = "posting_id"))
     @Enumerated(EnumType.STRING)
     @Column(name = "instrument", length = 20)
+    @BatchSize(size = 100)
     private Set<Instrument> instruments = new LinkedHashSet<>();
 
     /** 모집 인원. 미기재 허용. */
